@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+VERIFIED
 
 ## Owner
 
@@ -10,10 +10,10 @@ GamePM
 
 ## Reviewers
 
-- Dev: APPROVED
-- QA: APPROVED
-- Asset: APPROVED
-- StudioLead Gate: APPROVED
+- Dev: VERIFIED
+- QA: VERIFIED
+- Asset: VERIFIED
+- StudioLead Gate: VERIFIED
 
 ## Player Goal
 

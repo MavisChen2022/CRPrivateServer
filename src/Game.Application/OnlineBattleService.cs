@@ -116,6 +116,11 @@ public sealed class OnlineBattleService
             displayName,
             now,
             cancellationToken);
+        if (!created.Succeeded)
+        {
+            return created;
+        }
+
         await _store.SaveQueueEntryAsync(opponent with
         {
             Status = "Matched",

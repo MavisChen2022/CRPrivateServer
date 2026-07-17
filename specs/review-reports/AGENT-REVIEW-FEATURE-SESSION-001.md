@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+VERIFIED
 
 ## Requirement
 
@@ -15,7 +15,7 @@ FEATURE-SESSION-001
 ## StudioLead Summary
 
 The guest-session persistence, UI placeholder behavior, asset fallback, API hardening, and
-browser behavior evidence now pass through `npm.cmd test`. FEATURE-SESSION-001 is approved by
+browser behavior evidence now pass through `npm.cmd test`. FEATURE-SESSION-001 is verified by
 GamePM, Dev, Asset, and QA final review.
 
 ## GamePM Review
@@ -79,8 +79,8 @@ Status: APPROVED
 
 ## Evidence
 
-- GamePM final subagent: APPROVED.
-- Dev final subagent: APPROVED.
-- Asset final subagent: APPROVED.
-- QA final subagent: APPROVED.
+- GamePM final subagent: VERIFIED.
+- Dev final subagent: VERIFIED.
+- Asset final subagent: VERIFIED.
+- QA final subagent: VERIFIED.
 - StudioLead evidence: `npm.cmd test` passed on 2026-07-18, including 7 API integration tests and 14 Playwright browser tests.

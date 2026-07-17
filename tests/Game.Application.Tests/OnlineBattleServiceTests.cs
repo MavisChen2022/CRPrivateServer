@@ -54,6 +54,23 @@ public sealed class OnlineBattleServiceTests
     }
 
     [Fact]
+    public async Task QueueAsync_WhenQueuedOpponentAlreadyHasActiveRoom_ShouldReturnConflictWithoutMarkingMatch()
+    {
+        var store = CreateStoreWithProfiles(out var playerOne, out var playerTwo);
+        var third = Guid.NewGuid();
+        store.AddProfile(third, "Player100003");
+        var service = new OnlineBattleService(store, new OnlineBattleEngine());
+        await service.QueueAsync(playerOne, "Player100001", DateTimeOffset.UtcNow, CancellationToken.None);
+        store.AddActiveRoom(playerOne, third);
+
+        var matched = await service.QueueAsync(playerTwo, "Player100002", DateTimeOffset.UtcNow, CancellationToken.None);
+
+        Assert.False(matched.Succeeded);
+        Assert.Equal("PlayerAlreadyInBattle", matched.ErrorCode);
+        Assert.DoesNotContain(store.QueueEntries, x => x.PlayerId == playerOne && x.Status == "Matched");
+    }
+
+    [Fact]
     public async Task SubmitDeployAsync_WhenParticipantActs_ShouldUpdateSharedSnapshot()
     {
         var store = CreateStoreWithProfiles(out var playerOne, out var playerTwo);
@@ -116,6 +133,20 @@ public sealed class OnlineBattleServiceTests
         public void AddProfile(Guid playerId, string displayName)
         {
             _profiles.Add(new StoredFriendProfile(playerId, displayName, 0));
+        }
+
+        public void AddActiveRoom(Guid playerOneId, Guid playerTwoId)
+        {
+            var snapshot = new OnlineBattleEngine().Start(playerOneId, "Player100001", playerTwoId, "Player100003");
+            _rooms.Add(new StoredOnlineBattleRoom(
+                snapshot.RoomId,
+                snapshot.PlayerOne.PlayerId,
+                snapshot.PlayerTwo.PlayerId,
+                snapshot.Status,
+                snapshot,
+                DateTimeOffset.UtcNow,
+                DateTimeOffset.UtcNow,
+                null));
         }
 
         public Task<IReadOnlyList<Guid>> WaitingPlayersAsync()

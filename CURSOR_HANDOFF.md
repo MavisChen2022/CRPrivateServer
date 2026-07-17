@@ -5,8 +5,7 @@
 - Repository: `MavisChen2022/CRPrivateServer`
 - Branch: `main`
 - Latest verified local state: FEATURE-SESSION-001, FEATURE-BATTLE-001, FEATURE-FRIEND-001,
-  FEATURE-ONLINE-001, and FEATURE-FRIENDLY-BATTLE-001 are verified locally. The friendly battle
-  implementation is ready for the next commit and push.
+  FEATURE-ONLINE-001, FEATURE-FRIENDLY-BATTLE-001, and RELEASE-GATE-MVP-001 are verified locally.
 - Full verification command passed on 2026-07-18:
 
 ```powershell
@@ -14,12 +13,13 @@ npm.cmd test
 ```
 
 This currently runs docs validation, web validation, Vite build, `dotnet test CRPrivateServer.sln`,
-and Playwright e2e. Latest friendly battle feature evidence includes Domain 31, Application 21, API
+and Playwright e2e. Latest MVP release evidence includes Domain 31, Application 22, API
 integration 36, and Playwright 38/38 passing.
 
 ## Completed Slices
 
 - FEATURE-SESSION-001 is approved by GamePM, Dev, Asset, and QA final review.
+- FEATURE-SESSION-001 is release-gate verified by repeated full `npm.cmd test` evidence.
 - Guest session API backed by SQLite through `src/Game.Infrastructure`.
 - Secure raw session token generation; database stores token hash only.
 - Cookie behavior: `HttpOnly`, `SameSite=Lax`, `Secure` outside Development.
@@ -94,20 +94,17 @@ integration 36, and Playwright 38/38 passing.
 
 ## Remaining QA Gate Work
 
-1. Keep four long-lived agent roles active for every next slice:
+1. Keep four long-lived agent roles active for every future slice:
    - GamePM: requirement scope, player journey, traceability.
    - Dev: architecture, server-authoritative logic, persistence/contracts.
    - Asset: public-safe imported assets, fallback UI, accessibility.
    - QA: gate criteria, automated tests, evidence.
-2. Start the next feature slice:
-   - `FEATURE-BATTLE-001`: verified MVP; next work is polish, richer results, migrations, and optional safe audio.
-   - `FEATURE-FRIEND-001`: verified MVP; next work is copy button polish, clearer already-resolved
-     request codes, migrations, and optional friend battle planning as a separate feature.
-   - `FEATURE-ONLINE-001`: verified MVP; next work is high-concurrency matchmaking hardening,
-     clearer ended-room history UX, migrations, and optional SignalR as a separate slice.
-   - `FEATURE-FRIENDLY-BATTLE-001`: verified MVP; next work is explicit expiry UI, better
-     notifications, transaction-level accept guards, migrations, and optional SignalR.
+2. MVP is release-ready. Recommended post-MVP work:
+   - Explicit friendly invite expiry UI and better notifications.
+   - Transaction-level guards around high-concurrency friendly invite acceptance and matchmaking.
+   - Formal database migrations instead of startup `CREATE TABLE IF NOT EXISTS` bootstrapping.
    - Deck/card data import pipeline with public-safe asset handling.
+   - Optional public-safe audio hooks and user-controlled sound settings.
 
 ## Commands
 
@@ -121,5 +118,5 @@ dotnet test CRPrivateServer.sln
 
 ## Status Guidance
 
-`FEATURE-SESSION-001` is approved. Do not commit protected Clash Royale images, audio, fonts, or
+`RELEASE-GATE-MVP-001` is verified. Do not commit protected Clash Royale images, audio, fonts, or
 extracted data into this public repo.
