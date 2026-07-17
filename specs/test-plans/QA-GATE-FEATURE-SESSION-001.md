@@ -134,5 +134,5 @@ To move from `IN_REVIEW` to `APPROVED`, all of the following must be true:
 ## Current Gate Result
 
 CHANGES_REQUESTED. xUnit, partial API integration, and initial Playwright browser coverage now
-pass through `npm.cmd test`. QA approval remains blocked by expired-cookie, store-unavailable,
+pass through `npm.cmd test`. QA approval remains blocked by store-unavailable,
 restart-persistence, reduced-motion, API retry, and full cookie expiry/Secure-policy evidence.

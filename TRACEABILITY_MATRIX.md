@@ -21,6 +21,6 @@
 
 - `npm.cmd test`: passed on 2026-07-17 after docs validation, web validation, Vite build, `dotnet test CRPrivateServer.sln`, and Playwright e2e.
 - FEATURE-SESSION-001 unit coverage now includes xUnit domain and application tests.
-- FEATURE-SESSION-001 API integration coverage now includes no-cookie creation, valid-cookie reuse, and tampered-cookie replacement.
+- FEATURE-SESSION-001 API integration coverage now includes no-cookie creation, valid-cookie reuse, tampered-cookie replacement, and expired-cookie replacement.
 - FEATURE-SESSION-001 Playwright coverage now includes first visit, refresh, invalid cookie recovery, command placeholders, and desktop/mobile Chromium projects.
-- FEATURE-SESSION-001 remains `CHANGES_REQUESTED` until remaining API failure/restart, expired-cookie, reduced-motion, and retry cases pass.
+- FEATURE-SESSION-001 remains `CHANGES_REQUESTED` until remaining API failure/restart, reduced-motion, and retry cases pass.

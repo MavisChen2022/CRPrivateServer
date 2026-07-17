@@ -61,18 +61,18 @@ Status: CHANGES_REQUESTED
   Playwright e2e.
 - Domain, application, and API integration tests now run through xUnit.
 - API integration covers no-cookie session creation, valid cookie reuse, invalid cookie replacement,
-  cookie flags, and no token exposure.
+  expired cookie replacement, cookie flags, and no token exposure.
 - Playwright e2e covers first visit, refresh identity persistence, invalid cookie recovery,
   command placeholders, and desktop/mobile Chromium projects.
-- Missing tests include expired-cookie recovery, store unavailable `503 SessionStoreUnavailable`,
-  restart persistence, reduced-motion behavior, API retry behavior, and full cookie expiry/Secure policy.
+- Missing tests include store unavailable `503 SessionStoreUnavailable`, restart persistence,
+  reduced-motion behavior, API retry behavior, and full cookie expiry/Secure policy.
 
 ## Required Corrections
 
 1. Keep traceability at `CHANGES_REQUESTED` until the remaining QA hardening evidence exists.
 2. Extend Playwright behavior tests for reduced motion and API unavailable/retry behavior.
-3. Add API integration tests for expired-cookie recovery, store-unavailable response, restart
-   persistence, and full cookie expiry/Secure policy.
+3. Add API integration tests for store-unavailable response, restart persistence, and full cookie
+   expiry/Secure policy.
 4. Lazy-load Phaser or split the web bundle before production release.
 5. Keep protected Clash Royale image and sound assets out of Git; use `assets/imported/` only locally.
 
