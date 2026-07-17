@@ -1,0 +1,140 @@
+:root {
+  color: #f7fbff;
+  background: #10243b;
+  font-family: Inter, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  background: #f4c84d;
+  color: #241b00;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 44px;
+  padding: 0 18px;
+}
+
+.shell {
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.topbar {
+  align-items: center;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin: 0 auto 20px;
+  max-width: 980px;
+}
+
+.eyebrow {
+  color: #9ec9ef;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: 32px;
+  margin: 0;
+}
+
+.resource-strip {
+  display: flex;
+  gap: 12px;
+  margin: 0;
+}
+
+.resource-strip div {
+  background: #193856;
+  border: 1px solid #2f5f8a;
+  border-radius: 8px;
+  min-width: 112px;
+  padding: 10px 14px;
+}
+
+.resource-strip dt {
+  color: #9ec9ef;
+  font-size: 12px;
+}
+
+.resource-strip dd {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 2px 0 0;
+}
+
+.arena-layout {
+  align-items: stretch;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(280px, 360px) minmax(220px, 1fr);
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 980px;
+}
+
+.battle-preview {
+  aspect-ratio: 9 / 13;
+  border: 2px solid #6ab3ed;
+  border-radius: 8px;
+  min-height: 420px;
+  overflow: hidden;
+}
+
+.command-panel {
+  align-content: start;
+  display: grid;
+  gap: 12px;
+}
+
+.guest-warning,
+.status-panel {
+  background: #193856;
+  border: 1px solid #2f5f8a;
+  border-radius: 8px;
+  margin: 20px auto 0;
+  max-width: 980px;
+  padding: 14px 16px;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    padding: 16px;
+  }
+
+  .topbar,
+  .arena-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .resource-strip {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
