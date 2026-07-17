@@ -121,10 +121,14 @@ function collectMarkdown(dir) {
     return [];
   }
 
+  const ignoredDirectories = new Set(["node_modules", "bin", "obj", "dist"]);
   const files = [];
   for (const entry of readdirSync(dir)) {
     const fullPath = join(dir, entry);
     if (statSync(fullPath).isDirectory()) {
+      if (ignoredDirectories.has(entry)) {
+        continue;
+      }
       files.push(...collectMarkdown(fullPath));
     } else if (entry.endsWith(".md")) {
       files.push(fullPath);

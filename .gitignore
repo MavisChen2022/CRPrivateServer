@@ -1,6 +1,7 @@
 bin/
 obj/
 node_modules/
+src/Game.Web/dist/
 TestResults/
 test-data/
 data/*.db
@@ -9,4 +10,3 @@ data/*.db
 .vs/
 .idea/
 assets/imported/
-

@@ -4,9 +4,10 @@
   "version": "0.1.0",
   "description": "Browser-based server-authoritative royale battle private server.",
   "scripts": {
-    "test": "npm run test:docs && npm run test:web && npm run test:dotnet",
+    "test": "npm run test:docs && npm run test:web && npm run test:web:build && npm run test:dotnet",
     "test:docs": "node scripts/validate-docs.mjs",
     "test:web": "node scripts/validate-web.mjs",
+    "test:web:build": "npm --prefix src/Game.Web run build",
     "test:dotnet": "dotnet build CRPrivateServer.sln && dotnet run --project tests/Game.Domain.Tests/Game.Domain.Tests.csproj"
   }
 }
