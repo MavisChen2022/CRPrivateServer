@@ -9,8 +9,13 @@ export function createBattlePreview(containerId: string, options: PreviewOptions
   const scene = new Phaser.Scene("BattlePreview");
   const importedTextureKeys = ["arena", "topTower", "bottomTower"] as const;
   const deploySfxKey = "deploySfx";
+  const canUseImportedAssets = Boolean(window.localStorage.getItem("cr-imported-assets-ready"));
 
   scene.preload = function preload() {
+    if (!canUseImportedAssets) {
+      return;
+    }
+
     this.load.image("arena", resolveImportedAsset("arena"));
     this.load.image("topTower", resolveImportedAsset("topTower"));
     this.load.image("bottomTower", resolveImportedAsset("bottomTower"));
@@ -20,7 +25,8 @@ export function createBattlePreview(containerId: string, options: PreviewOptions
   scene.create = function create() {
     const width = 360;
     const height = 520;
-    const hasImportedBattleSet = importedTextureKeys.every((key) => this.textures.exists(key));
+    const hasImportedBattleSet = canUseImportedAssets &&
+      importedTextureKeys.every((key) => this.textures.exists(key));
 
     if (hasImportedBattleSet) {
       this.add.image(width / 2, height / 2, "arena").setDisplaySize(width, height);

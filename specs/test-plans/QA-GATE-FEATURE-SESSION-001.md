@@ -33,8 +33,8 @@ or protected Clash Royale asset redistribution.
 | Suite | Required Project or Location | Required Command | Gate Blocking |
 |---|---|---|---|
 | xUnit unit tests | `tests/Game.Domain.Tests`, `tests/Game.Application.Tests` | `dotnet test CRPrivateServer.sln` | Yes |
-| API integration tests | `tests/Game.Api.Tests` with `WebApplicationFactory` | `dotnet test CRPrivateServer.sln --filter Category=Integration` | Yes |
-| Playwright behavior tests | `tests/Game.Web.Behavior` or `src/Game.Web/tests` | `npm.cmd run test:behavior` | Yes |
+| API integration tests | `tests/Game.Api.IntegrationTests` with `WebApplicationFactory` | `dotnet test CRPrivateServer.sln` | Yes |
+| Playwright behavior tests | `tests/e2e` | `npm.cmd run test:e2e` | Yes |
 | Docs and traceability validation | `scripts/validate-docs.mjs` | `npm.cmd run test:docs` | Yes |
 | Web build validation | `src/Game.Web` | `npm.cmd run test:web:build` | Yes |
 
@@ -133,6 +133,6 @@ To move from `IN_REVIEW` to `APPROVED`, all of the following must be true:
 
 ## Current Gate Result
 
-CHANGES_REQUESTED. This document defines the next QA gate, but the implementation still needs real
-xUnit, API integration, Playwright, persistence, and security evidence before QA can approve.
-
+CHANGES_REQUESTED. xUnit, partial API integration, and initial Playwright browser coverage now
+pass through `npm.cmd test`. QA approval remains blocked by expired-cookie, store-unavailable,
+restart-persistence, reduced-motion, API retry, and full cookie expiry/Secure-policy evidence.

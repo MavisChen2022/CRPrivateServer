@@ -3,6 +3,9 @@ obj/
 node_modules/
 src/Game.Web/dist/
 TestResults/
+test-results/
+playwright-report/
+debug.log
 test-data/
 data/*.db
 *.user

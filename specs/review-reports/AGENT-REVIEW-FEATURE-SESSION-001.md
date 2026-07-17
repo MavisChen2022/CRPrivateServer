@@ -57,17 +57,20 @@ Status: CHANGES_REQUESTED, partial UI and resolver corrections applied
 
 Status: CHANGES_REQUESTED
 
-- `npm.cmd test` passes with docs validation, web validation, Vite build, and .NET tests.
+- `npm.cmd test` passes with docs validation, web validation, Vite build, .NET tests, and
+  Playwright e2e.
 - Domain, application, and API integration tests now run through xUnit.
 - API integration covers no-cookie session creation, valid cookie reuse, invalid cookie replacement,
   cookie flags, and no token exposure.
-- Missing tests include Playwright Gherkin flows, expired-cookie recovery, store unavailable
-  `503 SessionStoreUnavailable`, restart persistence, and full cookie expiry/Secure policy.
+- Playwright e2e covers first visit, refresh identity persistence, invalid cookie recovery,
+  command placeholders, and desktop/mobile Chromium projects.
+- Missing tests include expired-cookie recovery, store unavailable `503 SessionStoreUnavailable`,
+  restart persistence, reduced-motion behavior, API retry behavior, and full cookie expiry/Secure policy.
 
 ## Required Corrections
 
-1. Keep traceability at `CHANGES_REQUESTED` until Playwright behavior evidence exists.
-2. Add Playwright behavior tests for `guest-session.feature`.
+1. Keep traceability at `CHANGES_REQUESTED` until the remaining QA hardening evidence exists.
+2. Extend Playwright behavior tests for reduced motion and API unavailable/retry behavior.
 3. Add API integration tests for expired-cookie recovery, store-unavailable response, restart
    persistence, and full cookie expiry/Secure policy.
 4. Lazy-load Phaser or split the web bundle before production release.
@@ -78,5 +81,6 @@ Status: CHANGES_REQUESTED
 - GamePM subagent: CHANGES_REQUESTED; scenarios are now documented, behavior evidence still missing.
 - Dev subagent: APPROVE for guest-session persistence slice.
 - Asset subagent: CHANGES_REQUESTED; public-safe placeholder UI is usable, resolver/fallback support added after review.
-- QA subagent: CHANGES_REQUESTED; xUnit/API coverage improved, Playwright and hardening tests still missing.
-- StudioLead evidence: `npm.cmd test` passed on 2026-07-17.
+- QA subagent: CHANGES_REQUESTED; xUnit/API coverage improved, initial Playwright coverage now passes,
+  hardening tests still missing.
+- StudioLead evidence: `npm.cmd test` passed on 2026-07-17, including 8 Playwright browser tests.
