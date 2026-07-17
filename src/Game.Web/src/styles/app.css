@@ -614,6 +614,31 @@ h1 {
   padding: 0 12px;
 }
 
+.challenge-row {
+  align-items: center;
+  background: #102b45;
+  border: 1px solid #3b6f9a;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 64px;
+  padding: 10px;
+}
+
+.challenge-row strong,
+.challenge-row span {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.challenge-row span {
+  color: #bddcf7;
+  font-size: 13px;
+  margin-top: 3px;
+}
+
 .sr-only {
   height: 1px;
   margin: -1px;
@@ -678,7 +703,8 @@ h1 {
   }
 
   .friend-request-form div,
-  .friend-row {
+  .friend-row,
+  .challenge-row {
     grid-template-columns: 1fr;
   }
 

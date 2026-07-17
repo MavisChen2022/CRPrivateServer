@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISoloBattleStore, EfSoloBattleStore>();
         services.AddScoped<IFriendStore, EfFriendStore>();
         services.AddScoped<IOnlineBattleStore, EfOnlineBattleStore>();
+        services.AddScoped<IFriendlyBattleStore, EfFriendlyBattleStore>();
         return services;
     }
 
@@ -52,6 +53,31 @@ public static class ServiceCollectionExtensions
 
             CREATE INDEX IF NOT EXISTS "IX_FRIENDSHIPS_ADDRESSEE_PLAYER_ID"
             ON "FRIENDSHIPS" ("ADDRESSEE_PLAYER_ID");
+
+            CREATE TABLE IF NOT EXISTS "FRIENDLY_BATTLE_INVITES" (
+                "INVITE_ID" TEXT NOT NULL CONSTRAINT "PK_FRIENDLY_BATTLE_INVITES" PRIMARY KEY,
+                "REQUESTER_PLAYER_ID" TEXT NOT NULL,
+                "ADDRESSEE_PLAYER_ID" TEXT NOT NULL,
+                "LOWER_PLAYER_ID" TEXT NOT NULL,
+                "HIGHER_PLAYER_ID" TEXT NOT NULL,
+                "STATUS" TEXT NOT NULL,
+                "ROOM_ID" TEXT NULL,
+                "CREATED_AT" TEXT NOT NULL,
+                "UPDATED_AT" TEXT NOT NULL,
+                "EXPIRES_AT" TEXT NOT NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS "IX_FRIENDLY_BATTLE_INVITES_REQUESTER_PLAYER_ID"
+            ON "FRIENDLY_BATTLE_INVITES" ("REQUESTER_PLAYER_ID");
+
+            CREATE INDEX IF NOT EXISTS "IX_FRIENDLY_BATTLE_INVITES_ADDRESSEE_PLAYER_ID"
+            ON "FRIENDLY_BATTLE_INVITES" ("ADDRESSEE_PLAYER_ID");
+
+            CREATE INDEX IF NOT EXISTS "IX_FRIENDLY_BATTLE_INVITES_ROOM_ID"
+            ON "FRIENDLY_BATTLE_INVITES" ("ROOM_ID");
+
+            CREATE INDEX IF NOT EXISTS "IX_FRIENDLY_BATTLE_INVITES_PAIR_STATUS"
+            ON "FRIENDLY_BATTLE_INVITES" ("LOWER_PLAYER_ID", "HIGHER_PLAYER_ID", "STATUS");
 
             CREATE TABLE IF NOT EXISTS "MATCHMAKING_QUEUE" (
                 "PLAYER_ID" TEXT NOT NULL CONSTRAINT "PK_MATCHMAKING_QUEUE" PRIMARY KEY,

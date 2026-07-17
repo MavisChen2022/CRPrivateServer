@@ -109,11 +109,42 @@ public sealed class OnlineBattleService
             return Success(new OnlineBattleState("Waiting", null, null));
         }
 
-        var snapshot = _engine.Start(
+        var created = await CreateRoomAsync(
             opponent.PlayerId,
             opponentProfile.DisplayName,
             playerId,
-            displayName);
+            displayName,
+            now,
+            cancellationToken);
+        await _store.SaveQueueEntryAsync(opponent with
+        {
+            Status = "Matched",
+            UpdatedAt = now,
+            MatchedRoomId = created.State!.RoomId
+        }, cancellationToken);
+
+        return created;
+    }
+
+    public async Task<OnlineBattleServiceResult> CreateRoomAsync(
+        Guid playerOneId,
+        string playerOneDisplayName,
+        Guid playerTwoId,
+        string playerTwoDisplayName,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (await _store.FindActiveByPlayerAsync(playerOneId, cancellationToken) is not null ||
+            await _store.FindActiveByPlayerAsync(playerTwoId, cancellationToken) is not null)
+        {
+            return new OnlineBattleServiceResult(false, null, "PlayerAlreadyInBattle", 409);
+        }
+
+        var snapshot = _engine.Start(
+            playerOneId,
+            playerOneDisplayName,
+            playerTwoId,
+            playerTwoDisplayName);
         await _store.SaveRoomAsync(new StoredOnlineBattleRoom(
             snapshot.RoomId,
             snapshot.PlayerOne.PlayerId,
@@ -123,12 +154,6 @@ public sealed class OnlineBattleService
             now,
             now,
             null), cancellationToken);
-        await _store.SaveQueueEntryAsync(opponent with
-        {
-            Status = "Matched",
-            UpdatedAt = now,
-            MatchedRoomId = snapshot.RoomId
-        }, cancellationToken);
 
         return Success(new OnlineBattleState("Active", snapshot.RoomId, snapshot));
     }

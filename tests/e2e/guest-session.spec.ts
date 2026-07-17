@@ -126,6 +126,46 @@ test("two guest players can request, accept, and persist a friendship", async ({
   }
 });
 
+test("two friends can accept a friendly battle challenge and reconnect", async ({ browser }) => {
+  const playerA = await openFriendsPage(browser);
+  const playerB = await openFriendsPage(browser);
+
+  try {
+    const codeB = await playerB.page.getByTestId("friend-code").innerText();
+    await playerA.page.getByTestId("friend-code-input").fill(codeB);
+    await playerA.page.getByTestId("send-friend-request-button").click();
+    await expect(playerA.page.getByTestId("outgoing-request-row")).toBeVisible();
+
+    await playerB.page.reload({ waitUntil: "domcontentloaded" });
+    await playerB.page.getByTestId("friends-button").click();
+    await expect(playerB.page.getByTestId("incoming-request-row")).toContainText(playerA.displayName);
+    await playerB.page.getByTestId("accept-friend-request-button").click();
+    await expect(playerB.page.getByTestId("friend-row")).toContainText(playerA.displayName);
+
+    await playerA.page.reload({ waitUntil: "domcontentloaded" });
+    await playerA.page.getByTestId("friends-button").click();
+    await expect(playerA.page.getByTestId("friend-row")).toContainText(playerB.displayName);
+    await playerA.page.getByTestId("challenge-friend-button").click();
+    await expect(playerA.page.getByTestId("outgoing-challenge-row")).toContainText(playerB.displayName);
+
+    await playerB.page.reload({ waitUntil: "domcontentloaded" });
+    await playerB.page.getByTestId("friends-button").click();
+    await expect(playerB.page.getByTestId("incoming-challenge-row")).toContainText(playerA.displayName);
+    await playerB.page.getByTestId("accept-challenge-button").click();
+    await expect(playerB.page.getByTestId("online-ready")).toBeVisible();
+    const roomB = await playerB.page.getByTestId("online-room-id").innerText();
+
+    await playerA.page.reload({ waitUntil: "domcontentloaded" });
+    await expect(playerA.page.getByTestId("online-ready")).toBeVisible();
+    await expect(playerA.page.getByTestId("online-room-id")).toHaveText(roomB);
+    await playerB.page.getByTestId("online-deploy-card-training-archer").click();
+    await expect(playerB.page.getByTestId("online-unit")).toBeVisible();
+  } finally {
+    await playerA.context.close();
+    await playerB.context.close();
+  }
+});
+
 test("reduced motion still renders a usable home and battle preview", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
 

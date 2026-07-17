@@ -4,9 +4,9 @@
 
 - Repository: `MavisChen2022/CRPrivateServer`
 - Branch: `main`
-- Latest verified local state: FEATURE-SESSION-001, FEATURE-BATTLE-001, FEATURE-FRIEND-001, and
-  FEATURE-ONLINE-001 are verified locally. The online feature implementation is ready for the next
-  commit and push.
+- Latest verified local state: FEATURE-SESSION-001, FEATURE-BATTLE-001, FEATURE-FRIEND-001,
+  FEATURE-ONLINE-001, and FEATURE-FRIENDLY-BATTLE-001 are verified locally. The friendly battle
+  implementation is ready for the next commit and push.
 - Full verification command passed on 2026-07-18:
 
 ```powershell
@@ -14,8 +14,8 @@ npm.cmd test
 ```
 
 This currently runs docs validation, web validation, Vite build, `dotnet test CRPrivateServer.sln`,
-and Playwright e2e. Latest online feature evidence includes Domain 31, Application 14, API
-integration 31, and Playwright 36/36 passing.
+and Playwright e2e. Latest friendly battle feature evidence includes Domain 31, Application 21, API
+integration 36, and Playwright 38/38 passing.
 
 ## Completed Slices
 
@@ -79,6 +79,18 @@ integration 31, and Playwright 36/36 passing.
     and placeholder-only arena/unit visuals.
   - Playwright covers waiting/cancel, two-browser-context match/deploy/refresh, non-participant
     forbidden access, desktop/mobile Chromium, and reduced-motion online interaction.
+- FEATURE-FRIENDLY-BATTLE-001 implementation:
+  - Application `FriendlyBattleService` owns accepted-friend-only challenge creation, duplicate
+    checks, cancel, reject, accept, expiry handling, and active-room projection.
+  - Infrastructure stores `FRIENDLY_BATTLE_INVITES` in SQLite and reuses online battle room tables.
+  - API exposes `GET /api/friendly-battles/current`, `POST /api/friendly-battles/invites`,
+    `POST /api/friendly-battles/invites/{inviteId}/accept`,
+    `POST /api/friendly-battles/invites/{inviteId}/reject`, and
+    `DELETE /api/friendly-battles/invites/{inviteId}`.
+  - Web Friends view shows Challenge actions, incoming/outgoing challenge rows, cancel/decline,
+    and accept-to-online-room behavior using placeholder-only UI.
+  - Playwright covers friend setup, challenge send, incoming accept, same-room reconnect, deploy,
+    desktop/mobile Chromium, and inherited reduced-motion behavior.
 
 ## Remaining QA Gate Work
 
@@ -93,6 +105,8 @@ integration 31, and Playwright 36/36 passing.
      request codes, migrations, and optional friend battle planning as a separate feature.
    - `FEATURE-ONLINE-001`: verified MVP; next work is high-concurrency matchmaking hardening,
      clearer ended-room history UX, migrations, and optional SignalR as a separate slice.
+   - `FEATURE-FRIENDLY-BATTLE-001`: verified MVP; next work is explicit expiry UI, better
+     notifications, transaction-level accept guards, migrations, and optional SignalR.
    - Deck/card data import pipeline with public-safe asset handling.
 
 ## Commands

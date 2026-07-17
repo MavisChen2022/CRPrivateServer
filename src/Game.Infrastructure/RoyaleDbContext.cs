@@ -16,6 +16,7 @@ public sealed class RoyaleDbContext : DbContext
     public DbSet<BattleCommandEntity> BattleCommands => Set<BattleCommandEntity>();
     public DbSet<FriendCodeEntity> FriendCodes => Set<FriendCodeEntity>();
     public DbSet<FriendshipEntity> Friendships => Set<FriendshipEntity>();
+    public DbSet<FriendlyBattleInviteEntity> FriendlyBattleInvites => Set<FriendlyBattleInviteEntity>();
     public DbSet<MatchmakingQueueEntity> MatchmakingQueue => Set<MatchmakingQueueEntity>();
     public DbSet<OnlineBattleRoomEntity> OnlineBattleRooms => Set<OnlineBattleRoomEntity>();
     public DbSet<OnlineBattleCommandEntity> OnlineBattleCommands => Set<OnlineBattleCommandEntity>();
@@ -111,6 +112,26 @@ public sealed class RoyaleDbContext : DbContext
             entity.HasIndex(x => new { x.LowerPlayerId, x.HigherPlayerId }).IsUnique();
             entity.HasIndex(x => x.RequesterPlayerId);
             entity.HasIndex(x => x.AddresseePlayerId);
+        });
+
+        modelBuilder.Entity<FriendlyBattleInviteEntity>(entity =>
+        {
+            entity.ToTable("FRIENDLY_BATTLE_INVITES");
+            entity.HasKey(x => x.InviteId);
+            entity.Property(x => x.InviteId).HasColumnName("INVITE_ID");
+            entity.Property(x => x.RequesterPlayerId).HasColumnName("REQUESTER_PLAYER_ID").IsRequired();
+            entity.Property(x => x.AddresseePlayerId).HasColumnName("ADDRESSEE_PLAYER_ID").IsRequired();
+            entity.Property(x => x.LowerPlayerId).HasColumnName("LOWER_PLAYER_ID").IsRequired();
+            entity.Property(x => x.HigherPlayerId).HasColumnName("HIGHER_PLAYER_ID").IsRequired();
+            entity.Property(x => x.Status).HasColumnName("STATUS").IsRequired();
+            entity.Property(x => x.RoomId).HasColumnName("ROOM_ID");
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.Property(x => x.UpdatedAt).HasColumnName("UPDATED_AT").IsRequired();
+            entity.Property(x => x.ExpiresAt).HasColumnName("EXPIRES_AT").IsRequired();
+            entity.HasIndex(x => x.RequesterPlayerId);
+            entity.HasIndex(x => x.AddresseePlayerId);
+            entity.HasIndex(x => x.RoomId);
+            entity.HasIndex(x => new { x.LowerPlayerId, x.HigherPlayerId, x.Status });
         });
 
         modelBuilder.Entity<MatchmakingQueueEntity>(entity =>
@@ -225,6 +246,20 @@ public sealed class FriendshipEntity
     public string Status { get; set; } = string.Empty;
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
+}
+
+public sealed class FriendlyBattleInviteEntity
+{
+    public Guid InviteId { get; set; }
+    public Guid RequesterPlayerId { get; set; }
+    public Guid AddresseePlayerId { get; set; }
+    public Guid LowerPlayerId { get; set; }
+    public Guid HigherPlayerId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public Guid? RoomId { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset ExpiresAt { get; set; }
 }
 
 public sealed class MatchmakingQueueEntity

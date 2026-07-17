@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -223,10 +223,10 @@ friends, online rooms, and friendly battle invite history.
 
 ## Review Evidence
 
-- GamePM: APPROVE TO START, scoped as accepted-friends-only non-ranked battle invites.
-- Dev: APPROVE TO START, recommends a `FriendlyBattleService` that reuses online battle room
-  creation and keeps invite lifecycle separate from matchmaking.
-- Asset: APPROVE TO START, requires Friends challenge controls, incoming challenge UI,
-  placeholder-only arena reuse, mobile, reduced motion, and no protected art/audio.
-- QA: APPROVE TO START, requires unit/API/two-context Playwright evidence for friend-only invites,
-  lifecycle actions, owner isolation, reconnect, no reward mutation, mobile, and reduced motion.
+- GamePM: VERIFIED, scoped as accepted-friends-only non-ranked battle invites.
+- Dev: VERIFIED, with `FriendlyBattleService` reusing online battle room creation and keeping
+  invite lifecycle separate from matchmaking.
+- Asset: VERIFIED, with Friends challenge controls, incoming challenge UI, placeholder-only arena
+  reuse, mobile, reduced motion, and no protected art/audio.
+- QA: VERIFIED after unit/API/two-context Playwright evidence for friend-only invites, lifecycle
+  actions, owner isolation, reconnect, no reward mutation, mobile, and reduced motion.

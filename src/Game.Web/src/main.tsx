@@ -142,6 +142,30 @@ type OnlineState =
   | { status: "ready"; state: OnlineBattleState; message?: string }
   | { status: "error"; message: string };
 
+type FriendlyBattleInvite = {
+  inviteId: string;
+  requesterPlayerId: string;
+  requesterDisplayName: string;
+  addresseePlayerId: string;
+  addresseeDisplayName: string;
+  status: "Pending" | "Accepted" | "Rejected" | "Cancelled" | "Expired";
+  roomId?: string;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt: string;
+};
+
+type FriendlyBattleSnapshot = {
+  incomingInvites: FriendlyBattleInvite[];
+  outgoingInvites: FriendlyBattleInvite[];
+  activeRoom?: OnlineBattleState;
+};
+
+type FriendlyBattleState =
+  | { status: "loading" }
+  | { status: "ready"; snapshot: FriendlyBattleSnapshot; message?: string }
+  | { status: "error"; message: string };
+
 type ViewState = "home" | "battle" | "friends" | "online";
 
 function usePrefersReducedMotion() {
@@ -357,6 +381,10 @@ function App() {
         onBackHome={() => setView("home")}
         onReload={openFriends}
         onSnapshot={setFriends}
+        onFriendlyRoom={(state) => {
+          setOnline({ status: "ready", state, message: "Friendly battle accepted." });
+          setView("online");
+        }}
       />
     );
   }
@@ -461,14 +489,39 @@ function FriendsScreen({
   friends,
   onBackHome,
   onReload,
-  onSnapshot
+  onSnapshot,
+  onFriendlyRoom
 }: {
   friends: FriendsState;
   onBackHome: () => void;
   onReload: () => void;
   onSnapshot: (state: FriendsState) => void;
+  onFriendlyRoom: (state: OnlineBattleState) => void;
 }) {
   const [friendCode, setFriendCode] = useState("");
+  const [friendly, setFriendly] = useState<FriendlyBattleState>({ status: "loading" });
+
+  useEffect(() => {
+    let disposed = false;
+    fetchFriendlyBattles()
+      .then((snapshot) => {
+        if (!disposed) {
+          setFriendly({ status: "ready", snapshot });
+        }
+      })
+      .catch((error) => {
+        if (!disposed) {
+          setFriendly({
+            status: "error",
+            message: error instanceof Error ? error.message : "Friendly battle load failed."
+          });
+        }
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, []);
 
   if (friends.status === "loading" || friends.status === "idle") {
     return (
@@ -535,6 +588,49 @@ function FriendsScreen({
     }
   };
 
+  const challengeFriend = async (friendPlayerId: string) => {
+    try {
+      const snapshot = await postFriendlyInvite(friendPlayerId);
+      setFriendly({ status: "ready", snapshot, message: "Friendly battle challenge sent." });
+    } catch (error) {
+      const nextSnapshot = error instanceof FriendlyBattleError && error.snapshot
+        ? error.snapshot
+        : friendly.status === "ready" ? friendly.snapshot : { incomingInvites: [], outgoingInvites: [] };
+      setFriendly({
+        status: "ready",
+        snapshot: nextSnapshot,
+        message: error instanceof Error ? error.message : "Friendly battle challenge failed."
+      });
+    }
+  };
+
+  const updateInvite = async (inviteId: string, action: "accept" | "reject" | "cancel") => {
+    try {
+      const snapshot = await postFriendlyAction(inviteId, action);
+      if (action === "accept" && snapshot.activeRoom) {
+        onFriendlyRoom(snapshot.activeRoom);
+        return;
+      }
+
+      setFriendly({
+        status: "ready",
+        snapshot,
+        message: action === "reject"
+          ? "Friendly battle declined."
+          : action === "cancel" ? "Friendly battle cancelled." : "Friendly battle updated."
+      });
+    } catch (error) {
+      const nextSnapshot = error instanceof FriendlyBattleError && error.snapshot
+        ? error.snapshot
+        : friendly.status === "ready" ? friendly.snapshot : { incomingInvites: [], outgoingInvites: [] };
+      setFriendly({
+        status: "ready",
+        snapshot: nextSnapshot,
+        message: error instanceof Error ? error.message : "Friendly battle update failed."
+      });
+    }
+  };
+
   return (
     <main className="shell friends-shell" data-testid="friends-ready">
       <header className="battle-topbar">
@@ -581,8 +677,73 @@ function FriendsScreen({
                 displayName={friend.displayName}
                 meta={`${friend.trophies} trophies / ${friend.shortPlayerId}`}
                 badge={friend.status}
-              />
+              >
+                <button
+                  type="button"
+                  data-testid="challenge-friend-button"
+                  onClick={() => challengeFriend(friend.playerId)}
+                >
+                  Challenge
+                </button>
+              </FriendRow>
             ))}
+          </FriendSection>
+
+          <FriendSection title="Challenges" emptyText="No friendly battle challenges.">
+            {friendly.status === "loading" ? (
+              <p className="friend-empty">Loading challenges...</p>
+            ) : null}
+            {friendly.status === "error" ? (
+              <p className="friends-status" data-testid="challenge-status" aria-live="polite">{friendly.message}</p>
+            ) : null}
+            {friendly.status === "ready" ? (
+              <>
+                <p className="friends-status" data-testid="challenge-status" aria-live="polite">
+                  {friendly.message ?? "Challenge an accepted friend to a non-ranked sandbox battle."}
+                </p>
+                {friendly.snapshot.incomingInvites.map((invite) => (
+                  <ChallengeRow
+                    key={invite.inviteId}
+                    invite={invite}
+                    testId="incoming-challenge-row"
+                    label={`${invite.requesterDisplayName} challenged you`}
+                  >
+                    <button
+                      type="button"
+                      data-testid="accept-challenge-button"
+                      onClick={() => updateInvite(invite.inviteId, "accept")}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      data-testid="decline-challenge-button"
+                      onClick={() => updateInvite(invite.inviteId, "reject")}
+                    >
+                      Decline
+                    </button>
+                  </ChallengeRow>
+                ))}
+                {friendly.snapshot.outgoingInvites.map((invite) => (
+                  <ChallengeRow
+                    key={invite.inviteId}
+                    invite={invite}
+                    testId="outgoing-challenge-row"
+                    label={`Waiting for ${invite.addresseeDisplayName}`}
+                  >
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      data-testid="cancel-challenge-button"
+                      onClick={() => updateInvite(invite.inviteId, "cancel")}
+                    >
+                      Cancel
+                    </button>
+                  </ChallengeRow>
+                ))}
+              </>
+            ) : null}
           </FriendSection>
 
           <FriendSection title="Incoming" emptyText="No incoming requests.">
@@ -674,6 +835,28 @@ function FriendRow({
       </div>
       <small>{badge}</small>
       {children ? <div className="friend-actions">{children}</div> : null}
+    </div>
+  );
+}
+
+function ChallengeRow({
+  invite,
+  testId,
+  label,
+  children
+}: {
+  invite: FriendlyBattleInvite;
+  testId: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="challenge-row" data-testid={testId}>
+      <div>
+        <strong>{label}</strong>
+        <span>{invite.status}</span>
+      </div>
+      <div className="friend-actions">{children}</div>
     </div>
   );
 }
@@ -1153,6 +1336,45 @@ async function postFriendAction(friendshipId: string, action: "accept" | "reject
   return response.json() as Promise<FriendsSnapshot>;
 }
 
+async function fetchFriendlyBattles() {
+  const response = await fetch("/api/friendly-battles/current", { credentials: "include" });
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Friendly battle load failed."));
+  }
+
+  return response.json() as Promise<FriendlyBattleSnapshot>;
+}
+
+async function postFriendlyInvite(friendPlayerId: string) {
+  const response = await fetch("/api/friendly-battles/invites", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ friendPlayerId })
+  });
+
+  if (!response.ok) {
+    throw await readFriendlyProblem(response, "Friendly battle challenge failed.");
+  }
+
+  return response.json() as Promise<FriendlyBattleSnapshot>;
+}
+
+async function postFriendlyAction(inviteId: string, action: "accept" | "reject" | "cancel") {
+  const method = action === "cancel" ? "DELETE" : "POST";
+  const suffix = action === "cancel" ? "" : `/${action}`;
+  const response = await fetch(`/api/friendly-battles/invites/${inviteId}${suffix}`, {
+    method,
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw await readFriendlyProblem(response, "Friendly battle update failed.");
+  }
+
+  return response.json() as Promise<FriendlyBattleSnapshot>;
+}
+
 async function fetchOnlineCurrent() {
   const response = await fetch("/api/online-battles/current", { credentials: "include" });
   if (!response.ok) {
@@ -1244,6 +1466,16 @@ class FriendRequestError extends Error {
   }
 }
 
+class FriendlyBattleError extends Error {
+  readonly snapshot?: FriendlyBattleSnapshot;
+
+  constructor(message: string, snapshot?: FriendlyBattleSnapshot) {
+    super(message);
+    this.name = "FriendlyBattleError";
+    this.snapshot = snapshot;
+  }
+}
+
 async function readFriendProblem(response: Response, fallback: string) {
   try {
     const problem = (await response.json()) as {
@@ -1254,6 +1486,19 @@ async function readFriendProblem(response: Response, fallback: string) {
     return new FriendRequestError(problem.code ?? problem.title ?? fallback, problem.snapshot);
   } catch {
     return new FriendRequestError(fallback);
+  }
+}
+
+async function readFriendlyProblem(response: Response, fallback: string) {
+  try {
+    const problem = (await response.json()) as {
+      code?: string;
+      title?: string;
+      snapshot?: FriendlyBattleSnapshot;
+    };
+    return new FriendlyBattleError(problem.code ?? problem.title ?? fallback, problem.snapshot);
+  } catch {
+    return new FriendlyBattleError(fallback);
   }
 }
 

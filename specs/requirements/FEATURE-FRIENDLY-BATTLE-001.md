@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Owner
 
@@ -10,10 +10,10 @@ GamePM
 
 ## Reviewers
 
-- Dev: PENDING
-- QA: PENDING
-- Asset: PENDING
-- StudioLead Gate: PENDING
+- Dev: APPROVED
+- QA: APPROVED
+- Asset: APPROVED
+- StudioLead Gate: VERIFIED
 
 ## Player Goal
 
@@ -92,8 +92,12 @@ without trophy changes, rewards, chat, clans, purchases, or ranked matchmaking p
 - Web gate: `npm.cmd run test:web` and `npm.cmd run test:web:build`
 - Behavior gate: `npm.cmd run test:e2e`
 - Full gate: `npm.cmd test`
+- Verified on 2026-07-18 with `npm.cmd test`: docs validation passed, web validation passed,
+  Vite build passed, `dotnet test CRPrivateServer.sln` passed with Domain 31, Application 21, and
+  API integration 36 tests, and Playwright passed 38/38 across desktop and mobile Chromium.
 
 ## Review Result
 
-Pending four-agent review. This document defines the intended friendly battle MVP before
-implementation begins.
+GamePM, Dev, Asset, and QA verified this friendly battle MVP on 2026-07-18 as an
+accepted-friends-only non-ranked battle invite flow that reuses online rooms without trophies,
+rewards, chat, clans, rematches, spectator mode, or protected assets.

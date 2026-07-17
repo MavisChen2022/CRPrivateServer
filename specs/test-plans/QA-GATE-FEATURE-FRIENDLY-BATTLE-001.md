@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -99,5 +99,6 @@ QA reviews must be `APPROVED`.
 
 ## Current Gate Result
 
-IN_REVIEW. GamePM, Dev, Asset, and QA approved starting this friendly battle invite MVP docs gate on
-2026-07-18. Implementation and automated evidence are pending.
+VERIFIED. GamePM, Dev, Asset, and QA verified this friendly battle invite MVP on 2026-07-18 after
+`npm.cmd test` passed. Evidence includes docs validation, web validation, Vite build, Domain 31,
+Application 21, API integration 36, and Playwright 38/38 across desktop and mobile Chromium.
