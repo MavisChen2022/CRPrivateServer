@@ -73,6 +73,9 @@ integration 24, and Playwright 30/30 passing.
    - `FEATURE-BATTLE-001`: verified MVP; next work is polish, richer results, migrations, and optional safe audio.
    - `FEATURE-FRIEND-001`: verified MVP; next work is copy button polish, clearer already-resolved
      request codes, migrations, and optional friend battle planning as a separate feature.
+   - `FEATURE-ONLINE-001`: docs gate entered `IN_REVIEW` for two-player matchmaking, online battle
+     rooms, server-authoritative commands, reconnect, result, mobile, reduced motion, and asset
+     fallback. Implementation has not started yet.
    - Deck/card data import pipeline with public-safe asset handling.
 
 ## Commands

@@ -5,6 +5,7 @@
 | FEATURE-SESSION-001 | `specs/features/guest-session.feature` | `specs/sdd/SDD-FEATURE-SESSION-001.md` | `specs/test-plans/UNIT-FEATURE-SESSION-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | APPROVED |
 | FEATURE-FRIEND-001 | `specs/features/friend-code.feature` | `specs/sdd/SDD-FEATURE-FRIEND-001.md` | `specs/test-plans/UNIT-FEATURE-FRIEND-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
 | FEATURE-BATTLE-001 | `specs/features/battle-sandbox.feature` | `specs/sdd/SDD-FEATURE-BATTLE-001.md` | `specs/test-plans/UNIT-FEATURE-BATTLE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
+| FEATURE-ONLINE-001 | `specs/features/online-battle.feature` | `specs/sdd/SDD-FEATURE-ONLINE-001.md` | `specs/test-plans/UNIT-FEATURE-ONLINE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | APPROVED |
 
 ## Status Rules
 
@@ -30,3 +31,4 @@
 - FEATURE-FRIEND-001 is `VERIFIED` after domain/API/web/e2e targeted gates passed on 2026-07-18.
 - FEATURE-FRIEND-001 full `npm.cmd test` passed on 2026-07-18 with Domain 21, Application 9, API integration 24, and Playwright 30/30.
 - FEATURE-FRIEND-001 coverage includes public-safe friend code generation, stable friend code retrieval, pending request creation, accept/reject lifecycle, duplicate/self/unknown/invalid/forbidden errors, response privacy, SQLite restart persistence, Friends UI empty state, aria-live validation messages, two-browser-context request/accept, refresh persistence, desktop/mobile Chromium, and reduced-motion regression coverage.
+- FEATURE-ONLINE-001 docs gate is `APPROVED` on 2026-07-18 after `npm.cmd run test:docs` passed and four agents approved the scoped MVP: queue, cancel, match, server-authoritative commands, reconnect, result, mobile, reduced motion, persistence, and asset fallback.
