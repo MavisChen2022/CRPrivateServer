@@ -1,0 +1,11 @@
+{
+  "name": "cr-private-server",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Browser-based server-authoritative royale battle private server.",
+  "scripts": {
+    "test": "npm run test:docs",
+    "test:docs": "node scripts/validate-docs.mjs"
+  }
+}
+
