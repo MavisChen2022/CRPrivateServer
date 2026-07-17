@@ -28,7 +28,13 @@ const requiredFiles = [
   "specs/sdd/SDD-FEATURE-ONLINE-001.md",
   "specs/test-plans/UNIT-FEATURE-ONLINE-001.md",
   "specs/test-plans/QA-GATE-FEATURE-ONLINE-001.md",
-  "specs/review-reports/AGENT-REVIEW-FEATURE-ONLINE-001.md"
+  "specs/review-reports/AGENT-REVIEW-FEATURE-ONLINE-001.md",
+  "specs/requirements/FEATURE-FRIENDLY-BATTLE-001.md",
+  "specs/features/friendly-battle.feature",
+  "specs/sdd/SDD-FEATURE-FRIENDLY-BATTLE-001.md",
+  "specs/test-plans/UNIT-FEATURE-FRIENDLY-BATTLE-001.md",
+  "specs/test-plans/QA-GATE-FEATURE-FRIENDLY-BATTLE-001.md",
+  "specs/review-reports/AGENT-REVIEW-FEATURE-FRIENDLY-BATTLE-001.md"
 ];
 
 const requiredReadmeSections = [
@@ -71,7 +77,13 @@ if (existsSync("README.md")) {
 
 if (existsSync("TRACEABILITY_MATRIX.md")) {
   const matrix = readFileSync("TRACEABILITY_MATRIX.md", "utf8");
-  for (const requirementId of ["FEATURE-SESSION-001", "FEATURE-FRIEND-001", "FEATURE-BATTLE-001", "FEATURE-ONLINE-001"]) {
+  for (const requirementId of [
+    "FEATURE-SESSION-001",
+    "FEATURE-FRIEND-001",
+    "FEATURE-BATTLE-001",
+    "FEATURE-ONLINE-001",
+    "FEATURE-FRIENDLY-BATTLE-001"
+  ]) {
     if (!matrix.includes(requirementId)) {
       fail(`TRACEABILITY_MATRIX.md is missing ${requirementId}`);
     }
@@ -185,7 +197,8 @@ if (existsSync("specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md")) {
 const featureDocuments = {
   "FEATURE-BATTLE-001": "battle-sandbox.feature",
   "FEATURE-FRIEND-001": "friend-code.feature",
-  "FEATURE-ONLINE-001": "online-battle.feature"
+  "FEATURE-ONLINE-001": "online-battle.feature",
+  "FEATURE-FRIENDLY-BATTLE-001": "friendly-battle.feature"
 };
 
 for (const [featureId, featureFile] of Object.entries(featureDocuments)) {
