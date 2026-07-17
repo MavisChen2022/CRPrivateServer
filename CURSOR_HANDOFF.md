@@ -4,7 +4,7 @@
 
 - Repository: `MavisChen2022/CRPrivateServer`
 - Branch: `main`
-- Latest verified local state: pending commit after FEATURE-SESSION-001 final approval and handoff refresh
+- Latest verified local state: FEATURE-SESSION-001 approved and pushed in `71c3aae`; FEATURE-BATTLE-001 docs gate is being prepared.
 - Full verification command passed on 2026-07-18:
 
 ```powershell
@@ -36,6 +36,10 @@ and Playwright e2e.
   - `assetResolver.ts` defines local imported asset paths and verifies image content type before enabling them.
   - Phaser preview falls back to original placeholder rendering when local assets are unavailable.
 - Phaser is lazy-loaded into a separate preview chunk.
+- FEATURE-BATTLE-001 start review:
+  - GamePM, Dev, Asset, and QA approved starting a server-authoritative solo sandbox battle loop.
+  - Scope is a playable training battle, not PvP or full Clash Royale parity.
+  - Public repo defaults must stay original placeholder visuals/audio with optional ignored local overrides.
 
 ## Remaining QA Gate Work
 
@@ -45,7 +49,7 @@ and Playwright e2e.
    - Asset: public-safe imported assets, fallback UI, accessibility.
    - QA: gate criteria, automated tests, evidence.
 2. Start the next feature slice:
-   - `FEATURE-BATTLE-001`: minimal solo sandbox battle loop.
+   - `FEATURE-BATTLE-001`: minimal solo sandbox battle loop with BDD, SDD, unit plan, QA gate, agent review, then domain/API/web tests.
    - `FEATURE-FRIEND-001`: placeholder to real friend list API.
    - Deck/card data import pipeline with public-safe asset handling.
 

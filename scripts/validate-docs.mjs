@@ -10,6 +10,13 @@ const requiredFiles = [
   "specs/test-plans/UNIT-FEATURE-SESSION-001.md",
   "specs/test-plans/QA-GATE-FEATURE-SESSION-001.md",
   "specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md"
+  ,
+  "specs/requirements/FEATURE-BATTLE-001.md",
+  "specs/features/battle-sandbox.feature",
+  "specs/sdd/SDD-FEATURE-BATTLE-001.md",
+  "specs/test-plans/UNIT-FEATURE-BATTLE-001.md",
+  "specs/test-plans/QA-GATE-FEATURE-BATTLE-001.md",
+  "specs/review-reports/AGENT-REVIEW-FEATURE-BATTLE-001.md"
 ];
 
 const requiredReadmeSections = [
@@ -159,6 +166,86 @@ if (existsSync("specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md")) {
   for (const text of ["## GamePM Review", "## Dev Review", "## Asset Review", "## QA Review", "## Required Corrections"]) {
     if (!report.includes(text)) {
       fail(`AGENT-REVIEW-FEATURE-SESSION-001.md is missing "${text}"`);
+    }
+  }
+}
+
+for (const featureId of ["FEATURE-BATTLE-001"]) {
+  const requirementPath = `specs/requirements/${featureId}.md`;
+  const featurePath = "specs/features/battle-sandbox.feature";
+  const sddPath = `specs/sdd/SDD-${featureId}.md`;
+  const unitPath = `specs/test-plans/UNIT-${featureId}.md`;
+  const qaPath = `specs/test-plans/QA-GATE-${featureId}.md`;
+  const reviewPath = `specs/review-reports/AGENT-REVIEW-${featureId}.md`;
+
+  if (existsSync(requirementPath)) {
+    const requirement = readFileSync(requirementPath, "utf8");
+    for (const text of requirementChecks) {
+      if (!requirement.includes(text)) {
+        fail(`${requirementPath} is missing "${text}"`);
+      }
+    }
+    if (!allowedStatuses.some((status) => requirement.includes(`\n${status}\n`))) {
+      fail(`${requirementPath} must include a valid status`);
+    }
+  }
+
+  if (existsSync(featurePath)) {
+    const feature = readFileSync(featurePath, "utf8");
+    for (const text of [`@${featureId}`, "Feature:", "Scenario:", "Then"]) {
+      if (!feature.includes(text)) {
+        fail(`${featurePath} is missing "${text}"`);
+      }
+    }
+  }
+
+  if (existsSync(sddPath)) {
+    const sdd = readFileSync(sddPath, "utf8");
+    for (const section of sddSections) {
+      if (!sdd.includes(section)) {
+        fail(`${sddPath} is missing "${section}"`);
+      }
+    }
+  }
+
+  if (existsSync(unitPath)) {
+    const plan = readFileSync(unitPath, "utf8");
+    for (const text of ["## Status", "## Test Cases", "## Execution", "## Evidence"]) {
+      if (!plan.includes(text)) {
+        fail(`${unitPath} is missing "${text}"`);
+      }
+    }
+    if (!allowedStatuses.some((status) => plan.includes(`\n${status}\n`))) {
+      fail(`${unitPath} must include a valid status`);
+    }
+  }
+
+  if (existsSync(qaPath)) {
+    const plan = readFileSync(qaPath, "utf8");
+    for (const text of [
+      "## Status",
+      "## Required Test Suites",
+      "## xUnit Unit Tests",
+      "## API Integration Tests",
+      "## Playwright Behavior Tests",
+      "## Evidence Criteria",
+      "## Current Gate Result"
+    ]) {
+      if (!plan.includes(text)) {
+        fail(`${qaPath} is missing "${text}"`);
+      }
+    }
+    if (!allowedStatuses.some((status) => plan.includes(`\n${status}\n`))) {
+      fail(`${qaPath} must include a valid status`);
+    }
+  }
+
+  if (existsSync(reviewPath)) {
+    const report = readFileSync(reviewPath, "utf8");
+    for (const text of ["## GamePM Review", "## Dev Review", "## Asset Review", "## QA Review", "## Required Corrections"]) {
+      if (!report.includes(text)) {
+        fail(`${reviewPath} is missing "${text}"`);
+      }
     }
   }
 }
