@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { createBattlePreview } from "./game/battlePreview";
 import "./styles/app.css";
 
 type SessionState =
@@ -88,7 +87,26 @@ function App() {
       return;
     }
 
-    return createBattlePreview("battle-preview", { reducedMotion });
+    let disposePreview: (() => void) | undefined;
+    let disposed = false;
+
+    Promise.all([
+      import("./game/battlePreview"),
+      import("./game/assetResolver")
+    ]).then(async ([{ createBattlePreview }, { detectImportedBattleAssets }]) => {
+      const useImportedAssets = await detectImportedBattleAssets();
+      if (!disposed) {
+        disposePreview = createBattlePreview("battle-preview", {
+          reducedMotion,
+          useImportedAssets
+        });
+      }
+    });
+
+    return () => {
+      disposed = true;
+      disposePreview?.();
+    };
   }, [reducedMotion, session.status]);
 
   if (session.status === "loading") {
@@ -105,7 +123,7 @@ function App() {
         <section className="status-panel">
           <h1>Connection problem</h1>
           <p>{session.message}</p>
-          <button type="button" onClick={() => window.location.reload()}>
+          <button type="button" data-testid="retry-button" onClick={() => window.location.reload()}>
             Retry
           </button>
         </section>

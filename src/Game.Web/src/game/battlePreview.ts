@@ -3,16 +3,16 @@ import { resolveImportedAsset } from "./assetResolver";
 
 type PreviewOptions = {
   reducedMotion: boolean;
+  useImportedAssets: boolean;
 };
 
 export function createBattlePreview(containerId: string, options: PreviewOptions) {
   const scene = new Phaser.Scene("BattlePreview");
   const importedTextureKeys = ["arena", "topTower", "bottomTower"] as const;
   const deploySfxKey = "deploySfx";
-  const canUseImportedAssets = Boolean(window.localStorage.getItem("cr-imported-assets-ready"));
 
   scene.preload = function preload() {
-    if (!canUseImportedAssets) {
+    if (!options.useImportedAssets) {
       return;
     }
 
@@ -25,7 +25,7 @@ export function createBattlePreview(containerId: string, options: PreviewOptions
   scene.create = function create() {
     const width = 360;
     const height = 520;
-    const hasImportedBattleSet = canUseImportedAssets &&
+    const hasImportedBattleSet = options.useImportedAssets &&
       importedTextureKeys.every((key) => this.textures.exists(key));
 
     if (hasImportedBattleSet) {

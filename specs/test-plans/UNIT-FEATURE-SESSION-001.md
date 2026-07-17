@@ -2,7 +2,7 @@
 
 ## Status
 
-CHANGES_REQUESTED
+APPROVED
 
 ## Requirement
 
@@ -10,10 +10,9 @@ FEATURE-SESSION-001
 
 ## Scope
 
-These tests now cover the domain rules for guest profiles and session token validation plus
-the application guest-session orchestration around no token, valid token reuse, and invalid
-token replacement. Browser behavior and remaining API hardening cases are tracked by the QA
-gate and still block feature approval.
+These tests cover the domain rules for guest profiles and session token validation plus the
+application guest-session orchestration around no token, valid token reuse, and invalid token
+replacement. API integration and browser behavior are tracked by the QA gate.
 
 ## Test Cases
 
@@ -41,6 +40,4 @@ dotnet test CRPrivateServer.sln
 
 ## Gate Result
 
-CHANGES_REQUESTED. The unit-test slice is now implemented with xUnit, but the overall
-FEATURE-SESSION-001 gate remains blocked by missing Playwright behavior coverage and remaining
-API hardening cases.
+APPROVED. The unit-test slice is implemented with xUnit and passes as part of `npm.cmd test`.

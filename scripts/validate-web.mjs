@@ -25,6 +25,7 @@ const main = readFileSync("src/Game.Web/src/main.tsx", "utf8");
 for (const text of [
   "react",
   "createBattlePreview",
+  "detectImportedBattleAssets",
   "data-testid=\"home-ready\"",
   "data-testid=\"start-battle-button\"",
   "data-testid=\"command-placeholder\"",
@@ -58,6 +59,8 @@ for (const text of [
   "LOCAL_IMPORTED_ASSET_ROOT",
   "/assets/imported",
   "importedAssetManifest",
+  "detectImportedBattleAssets",
+  "method: \"HEAD\"",
   "scenes/arena.png",
   "sfx/deploy.mp3"
 ]) {

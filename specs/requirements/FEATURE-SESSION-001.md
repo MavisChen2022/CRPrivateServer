@@ -2,7 +2,7 @@
 
 ## Status
 
-CHANGES_REQUESTED
+APPROVED
 
 ## Owner
 
@@ -10,10 +10,10 @@ GamePM
 
 ## Reviewers
 
-- Dev: CHANGES_REQUESTED
-- QA: CHANGES_REQUESTED
-- Asset: CHANGES_REQUESTED
-- StudioLead Gate: CHANGES_REQUESTED
+- Dev: APPROVED
+- QA: APPROVED
+- Asset: APPROVED
+- StudioLead Gate: APPROVED
 
 ## Player Goal
 
@@ -58,10 +58,13 @@ account, while a returning guest keeps the same browser session after refresh.
 
 ## Test Evidence
 
+- Full gate: `npm.cmd test`
 - Document gate: `npm.cmd run test:docs`
+- API gate: `dotnet test CRPrivateServer.sln`
+- Behavior gate: `npm.cmd run test:e2e`
 
 ## Review Result
 
-Four-agent review on 2026-07-17 returned `CHANGES_REQUESTED`. The BDD intent remains valid,
-but Start Battle, Friends, and Deck need defined placeholder behavior; error/retry, expired
-cookie, mobile, reduced motion, and multi-tab scenarios need explicit coverage.
+Four-agent final review on 2026-07-18 approved FEATURE-SESSION-001. The previously requested
+placeholder behavior, retry, expired-cookie, mobile, reduced-motion, persistence, and
+tamper-resistance evidence pass through `npm.cmd test`.

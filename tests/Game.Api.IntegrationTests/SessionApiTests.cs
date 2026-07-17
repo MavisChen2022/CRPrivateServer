@@ -1,10 +1,14 @@
 using Game.Domain;
+using Game.Application;
 using Microsoft.Data.Sqlite;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Game.Api.IntegrationTests;
 
@@ -17,18 +21,7 @@ public sealed class SessionApiTests : IDisposable
     public SessionApiTests()
     {
         _databasePath = Path.Combine(Path.GetTempPath(), $"cr-session-{Guid.NewGuid():N}.db");
-        _factory = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.UseSetting("ConnectionStrings:GameDatabase", $"Data Source={_databasePath}");
-                builder.ConfigureAppConfiguration((_, configuration) =>
-                {
-                    configuration.AddInMemoryCollection(new Dictionary<string, string?>
-                    {
-                        ["ConnectionStrings:GameDatabase"] = $"Data Source={_databasePath}"
-                    });
-                });
-            });
+        _factory = CreateFactory(_databasePath);
     }
 
     [Fact]
@@ -45,7 +38,8 @@ public sealed class SessionApiTests : IDisposable
         Assert.Contains(response.Headers.GetValues("Set-Cookie"), x =>
             x.Contains("royale_session=", StringComparison.Ordinal) &&
             x.Contains("httponly", StringComparison.OrdinalIgnoreCase) &&
-            x.Contains("samesite=lax", StringComparison.OrdinalIgnoreCase));
+            x.Contains("samesite=lax", StringComparison.OrdinalIgnoreCase) &&
+            x.Contains("expires=", StringComparison.OrdinalIgnoreCase));
 
         var body = await response.Content.ReadFromJsonAsync<SessionResponse>(JsonOptions);
         Assert.NotNull(body);
@@ -123,6 +117,86 @@ public sealed class SessionApiTests : IDisposable
         Assert.NotEqual(expiredPlayerId, body!.PlayerId);
     }
 
+    [Fact]
+    public async Task GetSession_WhenStoreIsUnavailable_ShouldReturnStableProblemCode()
+    {
+        await using var factory = CreateFactory(
+            Path.Combine(Path.GetTempPath(), $"cr-session-failing-{Guid.NewGuid():N}.db"),
+            services =>
+            {
+                services.RemoveAll<IGuestSessionStore>();
+                services.AddScoped<IGuestSessionStore, FailingGuestSessionStore>();
+            });
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = false
+        });
+
+        var response = await client.GetAsync("/api/session");
+
+        Assert.Equal(System.Net.HttpStatusCode.ServiceUnavailable, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains("SessionStoreUnavailable", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("token", body, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task GetSession_AfterApiRestartWithSameDatabase_ShouldReturnSamePlayer()
+    {
+        var databasePath = Path.Combine(Path.GetTempPath(), $"cr-session-restart-{Guid.NewGuid():N}.db");
+
+        SessionResponse first;
+        string cookie;
+        await using (var firstFactory = CreateFactory(databasePath))
+        {
+            var firstClient = firstFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                HandleCookies = false
+            });
+            var firstResponse = await firstClient.GetAsync("/api/session");
+            cookie = ExtractSessionCookie(firstResponse);
+            first = (await firstResponse.Content.ReadFromJsonAsync<SessionResponse>(JsonOptions))!;
+        }
+
+        await using (var secondFactory = CreateFactory(databasePath))
+        {
+            var secondClient = secondFactory.CreateClient(new WebApplicationFactoryClientOptions
+            {
+                HandleCookies = false
+            });
+            var request = new HttpRequestMessage(HttpMethod.Get, "/api/session");
+            request.Headers.Add("Cookie", cookie);
+            var secondResponse = await secondClient.SendAsync(request);
+            secondResponse.EnsureSuccessStatusCode();
+            var second = await secondResponse.Content.ReadFromJsonAsync<SessionResponse>(JsonOptions);
+
+            Assert.NotNull(second);
+            Assert.Equal(first.PlayerId, second!.PlayerId);
+            Assert.False(secondResponse.Headers.TryGetValues("Set-Cookie", out _));
+        }
+
+        DeleteDatabaseFiles(databasePath);
+    }
+
+    [Fact]
+    public async Task GetSession_OutsideDevelopment_ShouldMarkSessionCookieSecure()
+    {
+        var databasePath = Path.Combine(Path.GetTempPath(), $"cr-session-secure-{Guid.NewGuid():N}.db");
+        await using var factory = CreateFactory(databasePath, environment: "Production");
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            HandleCookies = false
+        });
+
+        var response = await client.GetAsync("/api/session");
+
+        response.EnsureSuccessStatusCode();
+        Assert.Contains(response.Headers.GetValues("Set-Cookie"), x =>
+            x.StartsWith("royale_session=", StringComparison.Ordinal) &&
+            x.Contains("secure", StringComparison.OrdinalIgnoreCase));
+        DeleteDatabaseFiles(databasePath);
+    }
+
     private static string ExtractSessionCookie(HttpResponseMessage response)
     {
         var setCookie = response.Headers.GetValues("Set-Cookie")
@@ -156,10 +230,40 @@ public sealed class SessionApiTests : IDisposable
         await command.ExecuteNonQueryAsync();
     }
 
+    private static WebApplicationFactory<Program> CreateFactory(
+        string databasePath,
+        Action<IServiceCollection>? configureTestServices = null,
+        string environment = "Development")
+    {
+        return new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.UseEnvironment(environment);
+                builder.UseSetting("ConnectionStrings:GameDatabase", $"Data Source={databasePath}");
+                builder.ConfigureAppConfiguration((_, configuration) =>
+                {
+                    configuration.AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["ConnectionStrings:GameDatabase"] = $"Data Source={databasePath}"
+                    });
+                });
+
+                if (configureTestServices is not null)
+                {
+                    builder.ConfigureTestServices(configureTestServices);
+                }
+            });
+    }
+
     public void Dispose()
     {
         _factory.Dispose();
-        foreach (var path in new[] { _databasePath, $"{_databasePath}-shm", $"{_databasePath}-wal" })
+        DeleteDatabaseFiles(_databasePath);
+    }
+
+    private static void DeleteDatabaseFiles(string databasePath)
+    {
+        foreach (var path in new[] { databasePath, $"{databasePath}-shm", $"{databasePath}-wal" })
         {
             TryDelete(path);
         }
@@ -187,4 +291,23 @@ public sealed class SessionApiTests : IDisposable
         int Gold,
         string AccountType,
         string GuestWarning);
+
+    private sealed class FailingGuestSessionStore : IGuestSessionStore
+    {
+        public Task<StoredGuestSession?> FindByTokenHashAsync(
+            string tokenHash,
+            DateTimeOffset now,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("Simulated session store failure.");
+        }
+
+        public Task SaveGuestSessionAsync(
+            SessionToken token,
+            PlayerProfile player,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("Simulated session store failure.");
+        }
+    }
 }

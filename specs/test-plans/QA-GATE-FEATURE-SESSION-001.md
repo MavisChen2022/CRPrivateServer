@@ -2,7 +2,7 @@
 
 ## Status
 
-CHANGES_REQUESTED
+APPROVED
 
 ## Requirement
 
@@ -10,10 +10,9 @@ FEATURE-SESSION-001
 
 ## Purpose
 
-This gate defines the evidence required before QA can move guest session entry from
-`CHANGES_REQUESTED` to `IN_REVIEW` or `APPROVED`. The current implementation is a useful skeleton,
-but it is not QA-approved until durable session behavior, API behavior, browser behavior, and
-security cases are proven by automated tests.
+This gate defines the evidence required before QA can approve guest session entry. The current
+implementation has durable session behavior, API behavior, browser behavior, and security cases
+covered by automated tests and final four-agent review.
 
 ## Scope
 
@@ -133,6 +132,7 @@ To move from `IN_REVIEW` to `APPROVED`, all of the following must be true:
 
 ## Current Gate Result
 
-CHANGES_REQUESTED. xUnit, partial API integration, and initial Playwright browser coverage now
-pass through `npm.cmd test`. QA approval remains blocked by store-unavailable,
-restart-persistence, reduced-motion, API retry, and full cookie expiry/Secure-policy evidence.
+APPROVED. xUnit, API integration, Playwright browser coverage, restart persistence,
+store-unavailable response, reduced motion, API retry, client tamper resistance, and cookie
+expiry/Secure-policy evidence pass through `npm.cmd test`. GamePM, Dev, Asset, and QA final
+reviews approved this gate.

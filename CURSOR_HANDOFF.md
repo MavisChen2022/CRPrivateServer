@@ -4,8 +4,8 @@
 
 - Repository: `MavisChen2022/CRPrivateServer`
 - Branch: `main`
-- Latest verified commit: `66ad73d Cover expired guest session cookies`
-- Full verification command passed on 2026-07-17:
+- Latest verified local state: pending commit after FEATURE-SESSION-001 final approval and handoff refresh
+- Full verification command passed on 2026-07-18:
 
 ```powershell
 npm.cmd test
@@ -16,6 +16,7 @@ and Playwright e2e.
 
 ## Completed Slices
 
+- FEATURE-SESSION-001 is approved by GamePM, Dev, Asset, and QA final review.
 - Guest session API backed by SQLite through `src/Game.Infrastructure`.
 - Secure raw session token generation; database stores token hash only.
 - Cookie behavior: `HttpOnly`, `SameSite=Lax`, `Secure` outside Development.
@@ -23,42 +24,30 @@ and Playwright e2e.
   - `tests/Game.Domain.Tests`: domain guest/session token rules.
   - `tests/Game.Application.Tests`: create/reuse/replace guest session service behavior.
   - `tests/Game.Api.IntegrationTests`: no cookie, valid cookie reuse, tampered cookie replacement,
-    expired cookie replacement, cookie flags, and no token exposure.
+    expired cookie replacement, store-unavailable response, restart persistence, cookie flags,
+    Production `Secure` policy, bounded expiry, and no token exposure.
 - Playwright coverage:
   - `tests/e2e/guest-session.spec.ts`
   - Desktop Chromium and mobile Chromium projects.
-  - First visit, refresh identity persistence, invalid cookie recovery, and command placeholders.
+  - First visit, refresh identity persistence, invalid cookie recovery, command placeholders,
+    reduced motion, API retry, and client-side tamper resistance.
 - Public-safe asset policy:
   - `assets/imported/` remains ignored.
-  - `assetResolver.ts` defines local imported asset paths.
+  - `assetResolver.ts` defines local imported asset paths and verifies image content type before enabling them.
   - Phaser preview falls back to original placeholder rendering when local assets are unavailable.
+- Phaser is lazy-loaded into a separate preview chunk.
 
 ## Remaining QA Gate Work
 
-1. Add store-unavailable API integration coverage.
-   - Goal: force `IGuestSessionStore` failure and assert `503` with code `SessionStoreUnavailable`.
-   - Likely files: `tests/Game.Api.IntegrationTests/SessionApiTests.cs`, `src/Game.Api/Program.cs`.
-
-2. Add restart persistence coverage.
-   - Goal: create a guest session, dispose the API host, start a new host with the same SQLite DB,
-     send the original cookie, and assert the same player id returns.
-   - Watch for Windows SQLite file locks; keep cleanup best-effort.
-
-3. Add Playwright reduced-motion coverage.
-   - Goal: emulate `prefers-reduced-motion: reduce`, load home, assert the preview and controls remain usable.
-   - Likely file: `tests/e2e/guest-session.spec.ts`.
-
-4. Add Playwright API unavailable then retry coverage.
-   - Goal: simulate `/api/session` failure, verify error UI, click Retry or recover after route unblocking.
-   - May be easiest with Playwright `page.route` before first navigation.
-
-5. Split or lazy-load Phaser.
-   - Current Vite build passes but warns the Phaser bundle is over 500 kB.
-   - Likely files: `src/Game.Web/src/main.tsx`, `src/Game.Web/src/game/battlePreview.ts`.
-
-6. Improve imported asset readiness.
-   - Current resolver is public-safe and fallback-safe, but local imported assets require an explicit readiness path.
-   - Add a manifest probe or documented local manifest before marking Asset agent approved.
+1. Keep four long-lived agent roles active for every next slice:
+   - GamePM: requirement scope, player journey, traceability.
+   - Dev: architecture, server-authoritative logic, persistence/contracts.
+   - Asset: public-safe imported assets, fallback UI, accessibility.
+   - QA: gate criteria, automated tests, evidence.
+2. Start the next feature slice:
+   - `FEATURE-BATTLE-001`: minimal solo sandbox battle loop.
+   - `FEATURE-FRIEND-001`: placeholder to real friend list API.
+   - Deck/card data import pipeline with public-safe asset handling.
 
 ## Commands
 
@@ -72,6 +61,5 @@ dotnet test CRPrivateServer.sln
 
 ## Status Guidance
 
-Keep `FEATURE-SESSION-001` as `CHANGES_REQUESTED` until all remaining QA gate work above is
-implemented and the four agents can approve the gate. Do not commit protected Clash Royale images,
-audio, fonts, or extracted data into this public repo.
+`FEATURE-SESSION-001` is approved. Do not commit protected Clash Royale images, audio, fonts, or
+extracted data into this public repo.

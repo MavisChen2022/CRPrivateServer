@@ -19,6 +19,16 @@ const requiredReadmeSections = [
   "MVP Order",
   "Verification"
 ];
+const allowedStatuses = [
+  "DRAFT",
+  "IN_REVIEW",
+  "APPROVED",
+  "IMPLEMENTED",
+  "VERIFIED",
+  "RELEASED",
+  "CHANGES_REQUESTED",
+  "BLOCKED"
+];
 
 function fail(message) {
   console.error(`docs validation failed: ${message}`);
@@ -51,7 +61,6 @@ if (existsSync("TRACEABILITY_MATRIX.md")) {
 
 const requirementChecks = [
   "## Status",
-  "CHANGES_REQUESTED",
   "## Owner",
   "## Reviewers",
   "## Acceptance Criteria",
@@ -65,6 +74,9 @@ if (existsSync("specs/requirements/FEATURE-SESSION-001.md")) {
     if (!requirement.includes(text)) {
       fail(`FEATURE-SESSION-001.md is missing "${text}"`);
     }
+  }
+  if (!allowedStatuses.some((status) => requirement.includes(`\n${status}\n`))) {
+    fail("FEATURE-SESSION-001.md must include a valid status");
   }
 }
 
@@ -111,10 +123,13 @@ if (existsSync("specs/sdd/SDD-FEATURE-SESSION-001.md")) {
 
 if (existsSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md")) {
   const plan = readFileSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md", "utf8");
-  for (const text of ["## Status", "CHANGES_REQUESTED", "## Test Cases", "## Execution", "## Evidence"]) {
+  for (const text of ["## Status", "## Test Cases", "## Execution", "## Evidence"]) {
     if (!plan.includes(text)) {
       fail(`UNIT-FEATURE-SESSION-001.md is missing "${text}"`);
     }
+  }
+  if (!allowedStatuses.some((status) => plan.includes(`\n${status}\n`))) {
+    fail("UNIT-FEATURE-SESSION-001.md must include a valid status");
   }
 }
 
@@ -122,7 +137,6 @@ if (existsSync("specs/test-plans/QA-GATE-FEATURE-SESSION-001.md")) {
   const plan = readFileSync("specs/test-plans/QA-GATE-FEATURE-SESSION-001.md", "utf8");
   for (const text of [
     "## Status",
-    "CHANGES_REQUESTED",
     "## Required Test Suites",
     "## xUnit Unit Tests",
     "## API Integration Tests",
@@ -134,6 +148,9 @@ if (existsSync("specs/test-plans/QA-GATE-FEATURE-SESSION-001.md")) {
     if (!plan.includes(text)) {
       fail(`QA-GATE-FEATURE-SESSION-001.md is missing "${text}"`);
     }
+  }
+  if (!allowedStatuses.some((status) => plan.includes(`\n${status}\n`))) {
+    fail("QA-GATE-FEATURE-SESSION-001.md must include a valid status");
   }
 }
 
