@@ -12,6 +12,8 @@ public sealed class RoyaleDbContext : DbContext
     public DbSet<UserAccountEntity> UserAccounts => Set<UserAccountEntity>();
     public DbSet<PlayerProfileEntity> PlayerProfiles => Set<PlayerProfileEntity>();
     public DbSet<SessionTokenEntity> SessionTokens => Set<SessionTokenEntity>();
+    public DbSet<BattleSessionEntity> BattleSessions => Set<BattleSessionEntity>();
+    public DbSet<BattleCommandEntity> BattleCommands => Set<BattleCommandEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -49,6 +51,35 @@ public sealed class RoyaleDbContext : DbContext
             entity.Property(x => x.RevokedAt).HasColumnName("REVOKED_AT");
             entity.HasIndex(x => x.TokenHash).IsUnique();
         });
+
+        modelBuilder.Entity<BattleSessionEntity>(entity =>
+        {
+            entity.ToTable("BATTLE_SESSIONS");
+            entity.HasKey(x => x.BattleId);
+            entity.Property(x => x.BattleId).HasColumnName("BATTLE_ID");
+            entity.Property(x => x.PlayerId).HasColumnName("PLAYER_ID").IsRequired();
+            entity.Property(x => x.Status).HasColumnName("STATUS").IsRequired();
+            entity.Property(x => x.SnapshotJson).HasColumnName("SNAPSHOT_JSON").IsRequired();
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.Property(x => x.UpdatedAt).HasColumnName("UPDATED_AT").IsRequired();
+            entity.Property(x => x.EndedAt).HasColumnName("ENDED_AT");
+            entity.HasIndex(x => x.PlayerId);
+        });
+
+        modelBuilder.Entity<BattleCommandEntity>(entity =>
+        {
+            entity.ToTable("BATTLE_COMMANDS");
+            entity.HasKey(x => x.CommandId);
+            entity.Property(x => x.CommandId).HasColumnName("COMMAND_ID");
+            entity.Property(x => x.BattleId).HasColumnName("BATTLE_ID").IsRequired();
+            entity.Property(x => x.PlayerId).HasColumnName("PLAYER_ID").IsRequired();
+            entity.Property(x => x.CommandType).HasColumnName("COMMAND_TYPE").IsRequired();
+            entity.Property(x => x.CommandJson).HasColumnName("COMMAND_JSON").IsRequired();
+            entity.Property(x => x.SubmittedAtTick).HasColumnName("SUBMITTED_AT_TICK").IsRequired();
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.Property(x => x.RejectedCode).HasColumnName("REJECTED_CODE");
+            entity.HasIndex(x => x.BattleId);
+        });
     }
 }
 
@@ -77,5 +108,28 @@ public sealed class SessionTokenEntity
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset ExpiresAt { get; set; }
     public DateTimeOffset? RevokedAt { get; set; }
+}
+
+public sealed class BattleSessionEntity
+{
+    public Guid BattleId { get; set; }
+    public Guid PlayerId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string SnapshotJson { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? EndedAt { get; set; }
+}
+
+public sealed class BattleCommandEntity
+{
+    public Guid CommandId { get; set; }
+    public Guid BattleId { get; set; }
+    public Guid PlayerId { get; set; }
+    public string CommandType { get; set; } = string.Empty;
+    public string CommandJson { get; set; } = string.Empty;
+    public int SubmittedAtTick { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public string? RejectedCode { get; set; }
 }
 

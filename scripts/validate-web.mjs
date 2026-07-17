@@ -28,8 +28,13 @@ for (const text of [
   "detectImportedBattleAssets",
   "data-testid=\"home-ready\"",
   "data-testid=\"start-battle-button\"",
+  "data-testid=\"battle-ready\"",
+  "data-testid=\"enemy-tower-hp\"",
+  "data-testid={`deploy-card-${card.cardId}`}",
   "data-testid=\"command-placeholder\"",
   "data-testid=\"guest-warning\"",
+  "/api/battles/solo",
+  "/api/battles/${battle.snapshot.battleId}/tick",
   "prefers-reduced-motion",
   "aria-describedby=\"battle-preview-fallback\"",
   "aria-live=\"polite\""
@@ -78,6 +83,9 @@ const css = readFileSync("src/Game.Web/src/styles/app.css", "utf8");
 for (const text of [
   "button:focus-visible",
   ".command-placeholder",
+  ".solo-arena",
+  ".battle-hud",
+  ".starter-deck",
   ".sr-only",
   "@media (prefers-reduced-motion: reduce)"
 ]) {

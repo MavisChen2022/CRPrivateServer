@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddDbContext<RoyaleDbContext>(options => options.UseSqlite(connectionString));
         services.AddScoped<IGuestSessionStore, EfGuestSessionStore>();
+        services.AddScoped<ISoloBattleStore, EfSoloBattleStore>();
         return services;
     }
 

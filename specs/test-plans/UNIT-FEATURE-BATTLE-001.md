@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -43,5 +43,5 @@ Expected projects:
 
 ## Evidence
 
-Pending implementation. This plan is approved to start only after GamePM, Dev, Asset, and QA verify
-the cases map to `FEATURE-BATTLE-001`.
+Implemented and verified on 2026-07-18. `dotnet test CRPrivateServer.sln` passes with
+`SoloBattleEngineTests`, application tests, and battle API integration tests included.

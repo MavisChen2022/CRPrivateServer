@@ -1,10 +1,14 @@
 import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { resolve } from "node:path";
 
-const dataDir = "test-data";
+const dataDir = resolve("test-data");
 const databaseFiles = [
-  "test-data/e2e-playwright.db",
-  "test-data/e2e-playwright.db-shm",
-  "test-data/e2e-playwright.db-wal"
+  resolve("test-data/e2e-playwright.db"),
+  resolve("test-data/e2e-playwright.db-shm"),
+  resolve("test-data/e2e-playwright.db-wal"),
+  resolve("src/Game.Api/test-data/e2e-playwright.db"),
+  resolve("src/Game.Api/test-data/e2e-playwright.db-shm"),
+  resolve("src/Game.Api/test-data/e2e-playwright.db-wal")
 ];
 
 if (!existsSync(dataDir)) {

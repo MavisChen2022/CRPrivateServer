@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process";
 import { createConnection } from "node:net";
+import { resolve } from "node:path";
 
 const isWindows = process.platform === "win32";
 const playwrightBin = isWindows ? "cmd.exe" : "node_modules/.bin/playwright";
+const e2eDatabasePath = resolve("test-data/e2e-playwright.db");
 
 const children = [];
 
@@ -76,7 +78,7 @@ async function run() {
     ["run", "--project", "src/Game.Api", "--launch-profile", "http"],
     {
       ASPNETCORE_ENVIRONMENT: "Development",
-      ConnectionStrings__GameDatabase: "Data Source=test-data/e2e-playwright.db"
+      ConnectionStrings__GameDatabase: `Data Source=${e2eDatabasePath}`
     }
   );
 

@@ -59,7 +59,7 @@ test("invalid cookie recovers by issuing a replacement guest session", async ({ 
   expect(sessionCookie?.value).not.toBe("tampered-token");
 });
 
-test("command placeholders are interactive without over-promising gameplay", async ({ page }) => {
+test("secondary command placeholders stay honest", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await page.getByTestId("friends-button").click();
@@ -67,9 +67,6 @@ test("command placeholders are interactive without over-promising gameplay", asy
 
   await page.getByTestId("deck-button").click();
   await expect(page.getByTestId("command-placeholder")).toContainText("Starter deck pending");
-
-  await page.getByTestId("start-battle-button").click();
-  await expect(page.getByTestId("command-placeholder")).toContainText("Battle sandbox pending");
 });
 
 test("reduced motion still renders a usable home and battle preview", async ({ page }) => {
@@ -81,6 +78,60 @@ test("reduced motion still renders a usable home and battle preview", async ({ p
   await expect(page.getByTestId("battle-preview")).toBeVisible();
   await expect(page.getByTestId("battle-preview").locator("canvas")).toBeVisible();
   await expect(page.getByTestId("start-battle-button")).toBeVisible();
+});
+
+test("start battle opens a playable solo sandbox", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await page.getByTestId("start-battle-button").click();
+
+  await expect(page.getByTestId("battle-ready")).toBeVisible();
+  await expect(page.getByTestId("battle-arena")).toBeVisible();
+  await expect(page.getByTestId("enemy-tower-hp")).toHaveText("1000");
+  await expect(page.getByTestId("battle-elixir")).toContainText("5/10");
+  await expect(page.getByTestId("deploy-card-training-knight")).toBeVisible();
+  await expect(page.getByTestId("battle-status")).toContainText("Battle active");
+});
+
+test("deploying a unit consumes elixir and damages the enemy tower", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByTestId("start-battle-button").click();
+  await expect(page.getByTestId("battle-ready")).toBeVisible();
+
+  await page.getByTestId("deploy-card-training-knight").click();
+
+  await expect(page.getByTestId("battle-elixir")).toContainText("2/10");
+  await expect(page.getByTestId("battle-unit")).toBeVisible();
+  await expect.poll(async () => Number(await page.getByTestId("enemy-tower-hp").innerText()), {
+    timeout: 8000
+  }).toBeLessThan(1000);
+});
+
+test("battle snapshot survives refresh", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByTestId("start-battle-button").click();
+  await expect(page.getByTestId("battle-ready")).toBeVisible();
+  const battleId = await page.getByTestId("battle-id").innerText();
+
+  await page.getByTestId("deploy-card-training-archer").click();
+  await expect(page.getByTestId("battle-unit")).toBeVisible();
+  await page.reload({ waitUntil: "domcontentloaded" });
+
+  await expect(page.getByTestId("battle-ready")).toBeVisible();
+  await expect(page.getByTestId("battle-id")).toHaveText(battleId);
+  await expect(page.getByTestId("battle-unit")).toBeVisible();
+});
+
+test("reduced motion still allows battle interaction", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await page.getByTestId("start-battle-button").click();
+  await expect(page.getByTestId("battle-ready")).toBeVisible();
+  await page.getByTestId("deploy-card-training-knight").click();
+
+  await expect(page.getByTestId("battle-unit")).toBeVisible();
+  await expect(page.getByTestId("battle-status")).toContainText("Battle active");
 });
 
 test("session API failure shows an error and retry can recover", async ({ page }) => {

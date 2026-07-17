@@ -4,7 +4,7 @@
 |---|---|---|---|---|---|---|
 | FEATURE-SESSION-001 | `specs/features/guest-session.feature` | `specs/sdd/SDD-FEATURE-SESSION-001.md` | `specs/test-plans/UNIT-FEATURE-SESSION-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | APPROVED |
 | FEATURE-FRIEND-001 | Pending | Pending | Pending | Pending | Pending | DRAFT |
-| FEATURE-BATTLE-001 | `specs/features/battle-sandbox.feature` | `specs/sdd/SDD-FEATURE-BATTLE-001.md` | `specs/test-plans/UNIT-FEATURE-BATTLE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | IN_REVIEW |
+| FEATURE-BATTLE-001 | `specs/features/battle-sandbox.feature` | `specs/sdd/SDD-FEATURE-BATTLE-001.md` | `specs/test-plans/UNIT-FEATURE-BATTLE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
 
 ## Status Rules
 
@@ -24,4 +24,6 @@
 - FEATURE-SESSION-001 API integration coverage now includes no-cookie creation, valid-cookie reuse, tampered-cookie replacement, expired-cookie replacement, store-unavailable `503`, restart persistence, bounded expiry, and Production `Secure` cookie policy.
 - FEATURE-SESSION-001 Playwright coverage now includes first visit, refresh, invalid cookie recovery, command placeholders, reduced motion, API retry, client-side tamper resistance, and desktop/mobile Chromium projects.
 - FEATURE-SESSION-001 is `APPROVED` after final GamePM, Dev, Asset, and QA review.
-- FEATURE-BATTLE-001 entered `IN_REVIEW` on 2026-07-18 after GamePM, Dev, Asset, and QA approved starting a server-authoritative solo sandbox scope.
+- FEATURE-BATTLE-001 is `VERIFIED` after `npm.cmd test` passed on 2026-07-18.
+- FEATURE-BATTLE-001 unit/API coverage includes deterministic battle start, valid deploy, invalid card/lane/placement, insufficient elixir, tick movement/damage/elixir regen, tower win, timeout, session-required API, owner-only access, invalid command code, and SQLite restart persistence.
+- FEATURE-BATTLE-001 Playwright coverage includes Start Battle, solo arena rendering, deploy/elixir change, enemy tower HP damage, refresh persistence, reduced motion, and desktop/mobile Chromium projects.

@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Owner
 
@@ -10,10 +10,10 @@ GamePM
 
 ## Reviewers
 
-- Dev: APPROVE TO START
-- QA: APPROVE TO START
-- Asset: APPROVE TO START
-- StudioLead Gate: IN_REVIEW
+- Dev: APPROVED
+- QA: APPROVED
+- Asset: APPROVED
+- StudioLead Gate: VERIFIED
 
 ## Player Goal
 
@@ -80,6 +80,6 @@ the battle state, placement rules, elixir, tower damage, timer, and result.
 
 ## Review Result
 
-Four-agent start review on 2026-07-18 approved beginning this slice with a strict MVP scope:
-server-authoritative solo sandbox, public-safe placeholder visuals, optional ignored local assets,
-and automated evidence before approval.
+Four-agent review on 2026-07-18 approved the implemented MVP scope: server-authoritative solo
+sandbox, public-safe placeholder visuals, optional ignored local assets, and automated evidence
+through `npm.cmd test`.

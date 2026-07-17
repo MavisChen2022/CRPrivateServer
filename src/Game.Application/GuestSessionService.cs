@@ -54,6 +54,26 @@ public sealed class GuestSessionService
         return new GuestSessionResult(player, token, WasCreated: true);
     }
 
+    public async Task<PlayerProfile?> GetExistingPlayerAsync(
+        string? rawSessionToken,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(rawSessionToken))
+        {
+            return null;
+        }
+
+        var tokenHash = SessionToken.Hash(rawSessionToken);
+        var existing = await _store.FindByTokenHashAsync(tokenHash, now, cancellationToken);
+        if (existing is null || !existing.Token.IsValid(rawSessionToken, now))
+        {
+            return null;
+        }
+
+        return existing.Player;
+    }
+
     private static string CreateRawToken()
     {
         return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));

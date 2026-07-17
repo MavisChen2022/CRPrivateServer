@@ -37,6 +37,21 @@ button[aria-pressed="true"] {
   color: #12304d;
 }
 
+button:disabled {
+  background: #6d7781;
+  color: #d7e1eb;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  background: #224766;
+  color: #f7fbff;
+}
+
+.secondary-button:hover {
+  background: #2e5f87;
+}
+
 .shell {
   min-height: 100vh;
   padding: 24px;
@@ -143,6 +158,173 @@ h1 {
   padding: 14px 16px;
 }
 
+.battle-shell {
+  background:
+    linear-gradient(180deg, rgba(16, 36, 59, 0.92), rgba(16, 36, 59, 1)),
+    #10243b;
+}
+
+.battle-topbar,
+.battle-hud,
+.battle-board-layout {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1080px;
+}
+
+.battle-topbar {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.battle-hud {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  margin-bottom: 14px;
+}
+
+.battle-hud div,
+.battle-status {
+  background: #193856;
+  border: 1px solid #2f5f8a;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.battle-hud span {
+  color: #9ec9ef;
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.battle-hud strong {
+  display: block;
+  font-size: 24px;
+  margin-top: 4px;
+}
+
+.battle-board-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(300px, 520px) minmax(240px, 1fr);
+}
+
+.solo-arena {
+  aspect-ratio: 9 / 13;
+  background:
+    linear-gradient(90deg, transparent 32%, rgba(255, 255, 255, 0.12) 32%, rgba(255, 255, 255, 0.12) 34%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.12) 66%, rgba(255, 255, 255, 0.12) 68%, transparent 68%),
+    linear-gradient(180deg, #215c4c 0 47%, #3d86a3 47% 53%, #265c43 53% 100%);
+  border: 2px solid #6ab3ed;
+  border-radius: 8px;
+  min-height: 520px;
+  overflow: hidden;
+  position: relative;
+}
+
+.river {
+  background: #62c3df;
+  height: 6%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 47%;
+}
+
+.tower {
+  align-items: center;
+  background: #f4c84d;
+  border: 2px solid #241b00;
+  border-radius: 8px;
+  color: #241b00;
+  display: flex;
+  font-size: 14px;
+  font-weight: 900;
+  height: 56px;
+  justify-content: center;
+  left: 50%;
+  position: absolute;
+  transform: translateX(-50%);
+  width: 112px;
+  z-index: 2;
+}
+
+.cpu-tower {
+  top: 4%;
+}
+
+.player-tower {
+  bottom: 4%;
+}
+
+.battle-unit {
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid #12304d;
+  border-radius: 50%;
+  color: #12304d;
+  display: flex;
+  font-size: 11px;
+  font-weight: 900;
+  height: 54px;
+  justify-content: center;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 54px;
+  z-index: 3;
+}
+
+.lane-left {
+  left: 24%;
+}
+
+.lane-center {
+  left: 50%;
+}
+
+.lane-right {
+  left: 76%;
+}
+
+.battle-controls {
+  align-content: start;
+  display: grid;
+  gap: 12px;
+}
+
+.starter-deck {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.starter-deck button {
+  align-content: center;
+  display: grid;
+  gap: 3px;
+  min-height: 74px;
+  padding: 8px;
+}
+
+.starter-deck small {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.battle-status h2 {
+  font-size: 20px;
+  margin: 0 0 8px;
+}
+
+.battle-status p {
+  line-height: 1.45;
+  margin: 0;
+}
+
 .sr-only {
   height: 1px;
   margin: -1px;
@@ -172,6 +354,25 @@ h1 {
   .resource-strip {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .battle-topbar,
+  .battle-board-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .battle-topbar {
+    align-items: stretch;
+    display: grid;
+    gap: 12px;
+  }
+
+  .battle-hud {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .solo-arena {
+    min-height: 420px;
   }
 }
 

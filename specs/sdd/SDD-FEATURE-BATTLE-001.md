@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -175,8 +175,8 @@ approves a production data backup and rollback plan.
 
 ## Review Evidence
 
-- GamePM: APPROVE TO START, scoped as solo sandbox only.
-- Dev: APPROVE TO START, requires server-authoritative domain/application/API/persistence.
-- Asset: APPROVE TO START, requires public-safe placeholder assets and ignored local overrides.
-- QA: APPROVE TO START, requires domain, API, Playwright, mobile, reduced-motion, and ownership tests.
-- StudioLead: IN_REVIEW until implementation and full gate evidence pass.
+- GamePM: APPROVED, scoped as solo sandbox only with no PvP promise.
+- Dev: APPROVED, battle rules live in Domain/Application/API with SQLite snapshot persistence.
+- Asset: APPROVED, default visuals are public-safe placeholders and ignored local overrides remain optional.
+- QA: APPROVED, domain, API, Playwright, mobile, reduced-motion, and ownership tests pass.
+- StudioLead: VERIFIED through `npm.cmd test` on 2026-07-18.

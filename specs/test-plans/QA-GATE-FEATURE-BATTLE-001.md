@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -107,5 +107,8 @@ To move from `IMPLEMENTED` to `VERIFIED`, all of the following must be true:
 
 ## Current Gate Result
 
-IN_REVIEW. Four agents approved starting the slice on 2026-07-18. Implementation and automated
-evidence are still pending.
+VERIFIED. `npm.cmd test` passed on 2026-07-18 after docs validation, web validation, Vite build,
+`dotnet test CRPrivateServer.sln`, and Playwright desktop/mobile e2e. Evidence includes
+server-authoritative domain tests, API ownership and invalid-command tests, SQLite restart
+persistence, Start Battle UI, deploy/tower HP behavior, refresh persistence, reduced motion, and
+mobile coverage.
