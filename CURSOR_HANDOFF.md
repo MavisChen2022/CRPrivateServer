@@ -4,7 +4,9 @@
 
 - Repository: `MavisChen2022/CRPrivateServer`
 - Branch: `main`
-- Latest verified local state: FEATURE-SESSION-001, FEATURE-BATTLE-001, and FEATURE-FRIEND-001 are verified on `main`. The friend feature implementation is ready for the next commit and push.
+- Latest verified local state: FEATURE-SESSION-001, FEATURE-BATTLE-001, FEATURE-FRIEND-001, and
+  FEATURE-ONLINE-001 are verified locally. The online feature implementation is ready for the next
+  commit and push.
 - Full verification command passed on 2026-07-18:
 
 ```powershell
@@ -12,8 +14,8 @@ npm.cmd test
 ```
 
 This currently runs docs validation, web validation, Vite build, `dotnet test CRPrivateServer.sln`,
-and Playwright e2e. Latest friend feature evidence includes Domain 21, Application 9, API
-integration 24, and Playwright 30/30 passing.
+and Playwright e2e. Latest online feature evidence includes Domain 31, Application 14, API
+integration 31, and Playwright 36/36 passing.
 
 ## Completed Slices
 
@@ -61,6 +63,22 @@ integration 24, and Playwright 30/30 passing.
     CSS initials avatars, and `aria-live` status messages without protected assets or audio.
   - Playwright covers invalid/self/duplicate errors, two-browser-context request/accept, refresh
     persistence, desktop/mobile Chromium, and reduced-motion regression.
+- FEATURE-ONLINE-001 implementation:
+  - Domain `OnlineBattleEngine` owns two-player room start, side-aware deploy validation, elixir,
+    tick advancement, tower damage, and result calculation.
+  - Application `OnlineBattleService` owns SQLite-backed matchmaking, cancel queue, active-room
+    resume, participant authorization, command logging, and snapshot persistence.
+  - Infrastructure stores `MATCHMAKING_QUEUE`, `ONLINE_BATTLE_ROOMS`, and
+    `ONLINE_BATTLE_COMMANDS`.
+  - API exposes `POST /api/online-battles/matchmaking`, `DELETE /api/online-battles/matchmaking`,
+    `GET /api/online-battles/current`, `GET /api/online-battles/{roomId}`,
+    `POST /api/online-battles/{roomId}/commands`, and
+    `POST /api/online-battles/{roomId}/tick`.
+  - Web Online Battle view supports waiting, cancel, active room display, side-aware deploy,
+    polling/tick updates, refresh restore, owner-only room access, mobile layout, reduced motion,
+    and placeholder-only arena/unit visuals.
+  - Playwright covers waiting/cancel, two-browser-context match/deploy/refresh, non-participant
+    forbidden access, desktop/mobile Chromium, and reduced-motion online interaction.
 
 ## Remaining QA Gate Work
 
@@ -73,9 +91,8 @@ integration 24, and Playwright 30/30 passing.
    - `FEATURE-BATTLE-001`: verified MVP; next work is polish, richer results, migrations, and optional safe audio.
    - `FEATURE-FRIEND-001`: verified MVP; next work is copy button polish, clearer already-resolved
      request codes, migrations, and optional friend battle planning as a separate feature.
-   - `FEATURE-ONLINE-001`: docs gate entered `IN_REVIEW` for two-player matchmaking, online battle
-     rooms, server-authoritative commands, reconnect, result, mobile, reduced motion, and asset
-     fallback. Implementation has not started yet.
+   - `FEATURE-ONLINE-001`: verified MVP; next work is high-concurrency matchmaking hardening,
+     clearer ended-room history UX, migrations, and optional SignalR as a separate slice.
    - Deck/card data import pipeline with public-safe asset handling.
 
 ## Commands

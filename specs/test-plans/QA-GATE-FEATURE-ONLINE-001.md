@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+VERIFIED
 
 ## Requirement
 
@@ -86,5 +86,6 @@ QA reviews must be `APPROVED`.
 
 ## Current Gate Result
 
-APPROVED. GamePM, Dev, Asset, and QA approved starting this online battle MVP on 2026-07-18.
-Implementation and automated evidence are pending.
+VERIFIED. GamePM, Dev, Asset, and QA verified this online battle MVP on 2026-07-18 after
+`npm.cmd test` passed. Evidence includes docs validation, web validation, Vite build, Domain 31,
+Application 14, API integration 31, and Playwright 36/36 across desktop and mobile Chromium.

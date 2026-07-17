@@ -16,12 +16,16 @@ type PlayerSession = {
   guestWarning: string;
 };
 
-type CommandKey = "battle" | "friends" | "deck";
+type CommandKey = "battle" | "online" | "friends" | "deck";
 
 const commandCopy: Record<Exclude<CommandKey, "friends">, { title: string; body: string }> = {
   battle: {
     title: "Solo sandbox ready",
     body: "Start Battle opens a server-run training fight with placeholder cards and no matchmaking promise."
+  },
+  online: {
+    title: "Online room ready",
+    body: "Online Battle pairs two guest players into a server-run placeholder battle room."
   },
   deck: {
     title: "Starter deck pending",
@@ -94,7 +98,51 @@ type FriendsState =
   | { status: "ready"; snapshot: FriendsSnapshot; message?: string }
   | { status: "error"; message: string };
 
-type ViewState = "home" | "battle" | "friends";
+type OnlineParticipant = {
+  playerId: string;
+  displayName: string;
+  side: "Blue" | "Red";
+  towerHp: number;
+  elixir: number;
+  maxElixir: number;
+};
+
+type OnlineUnit = {
+  unitId: string;
+  ownerPlayerId: string;
+  side: "Blue" | "Red";
+  cardId: string;
+  name: string;
+  lane: "left" | "center" | "right";
+  position: number;
+  damagePerTick: number;
+};
+
+type OnlineBattleSnapshot = {
+  roomId: string;
+  status: "Active" | "Ended";
+  result: "None" | "PlayerOneWin" | "PlayerTwoWin" | "Draw";
+  tick: number;
+  durationTicks: number;
+  playerOne: OnlineParticipant;
+  playerTwo: OnlineParticipant;
+  starterDeck: BattleCard[];
+  units: OnlineUnit[];
+};
+
+type OnlineBattleState = {
+  status: "Idle" | "Waiting" | "Active" | "Ended";
+  roomId?: string;
+  snapshot?: OnlineBattleSnapshot;
+};
+
+type OnlineState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready"; state: OnlineBattleState; message?: string }
+  | { status: "error"; message: string };
+
+type ViewState = "home" | "battle" | "friends" | "online";
 
 function usePrefersReducedMotion() {
   const [reducedMotion, setReducedMotion] = useState(() =>
@@ -121,6 +169,7 @@ function App() {
   const [view, setView] = useState<ViewState>("home");
   const [battle, setBattle] = useState<BattleState>({ status: "idle" });
   const [friends, setFriends] = useState<FriendsState>({ status: "idle" });
+  const [online, setOnline] = useState<OnlineState>({ status: "idle" });
   const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
@@ -168,6 +217,28 @@ function App() {
       })
       .catch(() => {
         window.localStorage.removeItem("activeBattleId");
+      });
+
+    return () => {
+      disposed = true;
+    };
+  }, [session.status]);
+
+  useEffect(() => {
+    if (session.status !== "ready") {
+      return;
+    }
+
+    let disposed = false;
+    fetchOnlineCurrent()
+      .then((state) => {
+        if (!disposed && (state.status === "Waiting" || state.status === "Active")) {
+          setOnline({ status: "ready", state, message: "Online battle restored." });
+          setView("online");
+        }
+      })
+      .catch(() => {
+        // Online resume is best effort; the home screen remains usable without it.
       });
 
     return () => {
@@ -253,6 +324,20 @@ function App() {
     }
   };
 
+  const openOnline = async () => {
+    setActiveCommand("online");
+    setView("online");
+    setOnline({ status: "loading" });
+    try {
+      setOnline({ status: "ready", state: await postOnlineMatchmaking() });
+    } catch (error) {
+      setOnline({
+        status: "error",
+        message: error instanceof Error ? error.message : "Online battle service is unavailable."
+      });
+    }
+  };
+
   if (view === "battle") {
     return (
       <BattleScreen
@@ -272,6 +357,19 @@ function App() {
         onBackHome={() => setView("home")}
         onReload={openFriends}
         onSnapshot={setFriends}
+      />
+    );
+  }
+
+  if (view === "online") {
+    return (
+      <OnlineBattleScreen
+        online={online}
+        playerId={session.player.playerId}
+        reducedMotion={reducedMotion}
+        onBackHome={() => setView("home")}
+        onQueue={openOnline}
+        onSnapshot={setOnline}
       />
     );
   }
@@ -324,6 +422,14 @@ function App() {
             onClick={openFriends}
           >
             Friends
+          </button>
+          <button
+            type="button"
+            data-testid="online-battle-button"
+            aria-pressed={activeCommand === "online"}
+            onClick={openOnline}
+          >
+            Online Battle
           </button>
           <button
             type="button"
@@ -572,6 +678,255 @@ function FriendRow({
   );
 }
 
+function OnlineBattleScreen({
+  online,
+  playerId,
+  reducedMotion,
+  onBackHome,
+  onQueue,
+  onSnapshot
+}: {
+  online: OnlineState;
+  playerId: string;
+  reducedMotion: boolean;
+  onBackHome: () => void;
+  onQueue: () => void;
+  onSnapshot: (state: OnlineState) => void;
+}) {
+  useEffect(() => {
+    if (online.status !== "ready" || online.state.status !== "Waiting") {
+      return;
+    }
+
+    const interval = window.setInterval(async () => {
+      try {
+        const state = await fetchOnlineCurrent();
+        onSnapshot({
+          status: "ready",
+          state,
+          message: state.status === "Waiting" ? "Waiting for another guest player." : "Match found."
+        });
+      } catch {
+        onSnapshot({ status: "error", message: "Online matchmaking refresh failed." });
+      }
+    }, 900);
+
+    return () => window.clearInterval(interval);
+  }, [online, onSnapshot]);
+
+  useEffect(() => {
+    if (
+      online.status !== "ready" ||
+      online.state.status !== "Active" ||
+      !online.state.snapshot ||
+      online.state.snapshot.status !== "Active"
+    ) {
+      return;
+    }
+
+    const roomId = online.state.snapshot.roomId;
+    const interval = window.setInterval(async () => {
+      try {
+        const state = await postOnlineTick(roomId, 2);
+        onSnapshot({ status: "ready", state, message: "Battle active." });
+      } catch {
+        onSnapshot({ status: "error", message: "Online battle tick failed." });
+      }
+    }, reducedMotion ? 1400 : 850);
+
+    return () => window.clearInterval(interval);
+  }, [online, onSnapshot, reducedMotion]);
+
+  if (online.status === "loading" || online.status === "idle") {
+    return (
+      <main className="shell online-shell" data-testid="online-loading">
+        <section className="status-panel">Connecting to online matchmaking...</section>
+      </main>
+    );
+  }
+
+  if (online.status === "error") {
+    return (
+      <main className="shell online-shell" data-testid="online-error">
+        <section className="status-panel">
+          <h1>Online connection problem</h1>
+          <p>{online.message}</p>
+          <button type="button" data-testid="online-retry-button" onClick={onQueue}>
+            Retry
+          </button>
+          <button type="button" className="secondary-button" onClick={onBackHome}>
+            Back Home
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  const state = online.state;
+  const cancelQueue = async () => {
+    try {
+      onSnapshot({
+        status: "ready",
+        state: await deleteOnlineMatchmaking(),
+        message: "Matchmaking cancelled."
+      });
+    } catch (error) {
+      onSnapshot({
+        status: "ready",
+        state,
+        message: error instanceof Error ? error.message : "Cancel failed."
+      });
+    }
+  };
+
+  if (state.status === "Waiting" || !state.snapshot) {
+    return (
+      <main className="shell online-shell" data-testid="online-waiting">
+        <header className="battle-topbar">
+          <div>
+            <p className="eyebrow">Online sandbox</p>
+            <h1>Matchmaking</h1>
+          </div>
+          <button type="button" className="secondary-button" data-testid="online-back-home-button" onClick={onBackHome}>
+            Back Home
+          </button>
+        </header>
+
+        <section className="waiting-panel" aria-live="polite">
+          <h2>Waiting for opponent</h2>
+          <p data-testid="online-status">
+            {online.message ?? (state.status === "Idle" ? "Ready to queue." : "Waiting for another guest player.")}
+          </p>
+          <div className="online-actions">
+            {state.status === "Idle" ? (
+              <button type="button" data-testid="online-queue-button" onClick={onQueue}>
+                Queue Again
+              </button>
+            ) : (
+              <button type="button" data-testid="cancel-online-button" onClick={cancelQueue}>
+                Cancel
+              </button>
+            )}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  const snapshot = state.snapshot;
+  const self = snapshot.playerOne.playerId === playerId ? snapshot.playerOne : snapshot.playerTwo;
+  const opponent = snapshot.playerOne.playerId === playerId ? snapshot.playerTwo : snapshot.playerOne;
+  const deployY = self.side === "Blue" ? 0.72 : 0.28;
+  const resultText = onlineResultText(snapshot, playerId);
+
+  const deploy = async (cardId: string) => {
+    try {
+      const next = await postOnlineDeploy(snapshot.roomId, {
+        cardId,
+        lane: "center",
+        x: 0.5,
+        y: deployY
+      });
+      onSnapshot({ status: "ready", state: next, message: "Card deployed." });
+    } catch (error) {
+      onSnapshot({
+        status: "ready",
+        state,
+        message: error instanceof Error ? error.message : "Deploy rejected."
+      });
+    }
+  };
+
+  return (
+    <main className="shell online-shell" data-testid="online-ready">
+      <header className="battle-topbar">
+        <div>
+          <p className="eyebrow">Online sandbox</p>
+          <h1>Guest Battle</h1>
+        </div>
+        <button type="button" className="secondary-button" data-testid="online-back-home-button" onClick={onBackHome}>
+          Back Home
+        </button>
+      </header>
+
+      <section className="battle-hud online-hud" aria-label="Online battle state">
+        <div>
+          <span>{opponent.displayName}</span>
+          <strong data-testid="online-player-two-hp">{opponent.towerHp}</strong>
+        </div>
+        <div>
+          <span>Room</span>
+          <strong data-testid="online-room-id">{snapshot.roomId.slice(0, 8)}</strong>
+          <span className="sr-only" data-testid="online-room-full-id">{snapshot.roomId}</span>
+        </div>
+        <div>
+          <span>{self.displayName}</span>
+          <strong data-testid="online-player-one-hp">{self.towerHp}</strong>
+        </div>
+      </section>
+
+      <section className="online-layout">
+        <div className="online-arena" data-testid="online-arena" role="img" aria-label="Server snapshot of the online arena">
+          <div className={`tower online-tower online-tower-${opponent.side.toLowerCase()}`}>
+            {opponent.side} {opponent.towerHp}
+          </div>
+          <div className="river" />
+          <div className={`tower online-tower online-tower-${self.side.toLowerCase()}`}>
+            {self.side} {self.towerHp}
+          </div>
+          {snapshot.units.map((unit) => (
+            <div
+              key={unit.unitId}
+              className={`online-unit lane-${unit.lane} side-${unit.side.toLowerCase()}`}
+              style={{ top: `${Math.max(9, Math.min(88, unit.position / 10))}%` }}
+              data-testid="online-unit"
+            >
+              {unit.name.replace("Training ", "")}
+            </div>
+          ))}
+        </div>
+
+        <aside className="online-controls">
+          <section className="online-status-panel" aria-live="polite">
+            <h2>{snapshot.status === "Ended" ? "Battle ended" : "Battle active"}</h2>
+            <p data-testid="online-status">{online.message ?? "Deploy starter cards on your side of the river."}</p>
+            <dl>
+              <div>
+                <dt>Your elixir</dt>
+                <dd data-testid="online-player-one-elixir">{self.elixir}/{self.maxElixir}</dd>
+              </div>
+              <div>
+                <dt>Opponent elixir</dt>
+                <dd data-testid="online-player-two-elixir">{opponent.elixir}/{opponent.maxElixir}</dd>
+              </div>
+              <div>
+                <dt>Timer</dt>
+                <dd>{Math.max(0, snapshot.durationTicks - snapshot.tick)}</dd>
+              </div>
+            </dl>
+            <strong data-testid="online-result">{resultText}</strong>
+          </section>
+
+          <section className="starter-deck" aria-label="Online starter deck">
+            {snapshot.starterDeck.map((card) => (
+              <button
+                type="button"
+                key={card.cardId}
+                data-testid={`online-deploy-card-${card.cardId}`}
+                disabled={snapshot.status === "Ended" || self.elixir < card.elixirCost}
+                onClick={() => deploy(card.cardId)}
+              >
+                <span>{card.name}</span>
+                <small>{card.elixirCost} elixir</small>
+              </button>
+            ))}
+          </section>
+        </aside>
+      </section>
+    </main>
+  );
+}
+
 function BattleScreen({
   battle,
   reducedMotion,
@@ -796,6 +1151,87 @@ async function postFriendAction(friendshipId: string, action: "accept" | "reject
   }
 
   return response.json() as Promise<FriendsSnapshot>;
+}
+
+async function fetchOnlineCurrent() {
+  const response = await fetch("/api/online-battles/current", { credentials: "include" });
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Online battle load failed."));
+  }
+
+  return response.json() as Promise<OnlineBattleState>;
+}
+
+async function postOnlineMatchmaking() {
+  const response = await fetch("/api/online-battles/matchmaking", {
+    method: "POST",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Online matchmaking failed."));
+  }
+
+  return response.json() as Promise<OnlineBattleState>;
+}
+
+async function deleteOnlineMatchmaking() {
+  const response = await fetch("/api/online-battles/matchmaking", {
+    method: "DELETE",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Online matchmaking cancel failed."));
+  }
+
+  return response.json() as Promise<OnlineBattleState>;
+}
+
+async function postOnlineDeploy(roomId: string, body: unknown) {
+  const response = await fetch(`/api/online-battles/${roomId}/commands`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Online deploy failed."));
+  }
+
+  return response.json() as Promise<OnlineBattleState>;
+}
+
+async function postOnlineTick(roomId: string, ticks: number) {
+  const response = await fetch(`/api/online-battles/${roomId}/tick`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ticks })
+  });
+
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Online tick failed."));
+  }
+
+  return response.json() as Promise<OnlineBattleState>;
+}
+
+function onlineResultText(snapshot: OnlineBattleSnapshot, playerId: string) {
+  if (snapshot.status !== "Ended" || snapshot.result === "None") {
+    return "In progress";
+  }
+
+  if (snapshot.result === "Draw") {
+    return "Draw";
+  }
+
+  const selfIsPlayerOne = snapshot.playerOne.playerId === playerId;
+  const didWin =
+    (snapshot.result === "PlayerOneWin" && selfIsPlayerOne) ||
+    (snapshot.result === "PlayerTwoWin" && !selfIsPlayerOne);
+  return didWin ? "Victory" : "Defeat";
 }
 
 class FriendRequestError extends Error {

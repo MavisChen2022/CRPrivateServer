@@ -180,6 +180,10 @@ h1 {
     #10243b;
 }
 
+.online-shell {
+  background: #10243b;
+}
+
 .battle-topbar,
 .battle-hud,
 .battle-board-layout {
@@ -339,6 +343,139 @@ h1 {
 .battle-status p {
   line-height: 1.45;
   margin: 0;
+}
+
+.online-layout {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(300px, 520px) minmax(260px, 1fr);
+  margin: 0 auto;
+  max-width: 1080px;
+}
+
+.online-arena {
+  aspect-ratio: 9 / 13;
+  background:
+    linear-gradient(90deg, transparent 32%, rgba(255, 255, 255, 0.14) 32%, rgba(255, 255, 255, 0.14) 34%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.14) 66%, rgba(255, 255, 255, 0.14) 68%, transparent 68%),
+    linear-gradient(180deg, #7a3640 0 47%, #3d86a3 47% 53%, #245d47 53% 100%);
+  border: 2px solid #6ab3ed;
+  border-radius: 8px;
+  min-height: 520px;
+  overflow: hidden;
+  position: relative;
+}
+
+.online-hud {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.online-controls {
+  align-content: start;
+  display: grid;
+  gap: 12px;
+}
+
+.online-status-panel,
+.waiting-panel {
+  background: #193856;
+  border: 1px solid #2f5f8a;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.waiting-panel {
+  display: grid;
+  gap: 12px;
+  margin: 0 auto;
+  max-width: 720px;
+  min-height: 220px;
+}
+
+.waiting-panel h2,
+.online-status-panel h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.waiting-panel p,
+.online-status-panel p {
+  color: #d8ecff;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.online-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.online-status-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.online-status-panel dl {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  margin: 0;
+}
+
+.online-status-panel div {
+  background: #102b45;
+  border: 1px solid #3b6f9a;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.online-status-panel dt {
+  color: #9ec9ef;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.online-status-panel dd {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 3px 0 0;
+}
+
+.online-status-panel strong {
+  color: #ffffff;
+  font-size: 20px;
+}
+
+.online-tower-red {
+  top: 4%;
+}
+
+.online-tower-blue {
+  bottom: 4%;
+}
+
+.online-unit {
+  align-items: center;
+  border: 2px solid #12304d;
+  border-radius: 50%;
+  color: #12304d;
+  display: flex;
+  font-size: 11px;
+  font-weight: 900;
+  height: 54px;
+  justify-content: center;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 54px;
+  z-index: 3;
+}
+
+.side-blue {
+  background: #cceeff;
+}
+
+.side-red {
+  background: #ffd1d1;
 }
 
 .friends-shell {
@@ -509,7 +646,8 @@ h1 {
   }
 
   .battle-topbar,
-  .battle-board-layout {
+  .battle-board-layout,
+  .online-layout {
     grid-template-columns: 1fr;
   }
 
@@ -525,6 +663,14 @@ h1 {
 
   .solo-arena {
     min-height: 420px;
+  }
+
+  .online-arena {
+    min-height: 420px;
+  }
+
+  .online-status-panel dl {
+    grid-template-columns: 1fr;
   }
 
   .friends-layout {

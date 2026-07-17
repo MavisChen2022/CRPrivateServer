@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+VERIFIED
 
 ## Requirement
 
@@ -185,12 +185,12 @@ Initial MVP tables can be added through the current schema initializer. Before p
 
 ## Review Evidence
 
-- GamePM: APPROVE TO START, scoped as a minimal two-guest online battle room without ranked, chat,
-  clans, purchases, or full card parity.
-- Dev: APPROVE TO START, recommends SQLite-backed matchmaking/rooms, polling-first snapshots,
-  session-derived ownership, and stable problem codes.
-- Asset: APPROVE TO START, requires public-safe placeholder arena, waiting/reconnect/error states,
-  mobile, reduced motion, and no protected art/audio.
-- QA: APPROVE TO START, requires domain/API/two-context Playwright evidence for queue, cancel, match,
-  command sync, owner isolation, reconnect, result, mobile, reduced motion, and persistence.
-- StudioLead: APPROVED after docs gate passed on 2026-07-18.
+- GamePM: VERIFIED, scoped as a minimal two-guest online battle room without ranked, chat, clans,
+  purchases, or full card parity.
+- Dev: VERIFIED, with SQLite-backed matchmaking/rooms, polling-first snapshots, session-derived
+  ownership, and stable problem codes.
+- Asset: VERIFIED, with public-safe placeholder arena, waiting/error states, mobile, reduced
+  motion, and no protected art/audio.
+- QA: VERIFIED after domain/API/two-context Playwright evidence for queue, cancel, match, command
+  sync, owner isolation, reconnect, result coverage, mobile, reduced motion, and persistence.
+- StudioLead: VERIFIED after `npm.cmd test` passed on 2026-07-18.

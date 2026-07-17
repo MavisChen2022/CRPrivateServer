@@ -12,8 +12,10 @@ EnsureSqliteDirectoryExists(connectionString);
 builder.Services.AddGameInfrastructure(connectionString);
 builder.Services.AddScoped<GuestSessionService>();
 builder.Services.AddSingleton<SoloBattleEngine>();
+builder.Services.AddSingleton<OnlineBattleEngine>();
 builder.Services.AddScoped<SoloBattleService>();
 builder.Services.AddScoped<FriendService>();
+builder.Services.AddScoped<OnlineBattleService>();
 
 var app = builder.Build();
 await app.Services.EnsureGameDatabaseAsync();
@@ -268,6 +270,159 @@ app.MapPost("/api/friends/requests/{friendshipId:guid}/reject", async (
     }
 });
 
+app.MapPost("/api/online-battles/matchmaking", async (
+    HttpContext context,
+    GuestSessionService sessions,
+    OnlineBattleService onlineBattles) =>
+{
+    var player = await ResolvePlayerAsync(context, sessions);
+    if (player is null)
+    {
+        return SessionRequired();
+    }
+
+    try
+    {
+        return ToOnlineBattleResult(await onlineBattles.QueueAsync(
+            player.PlayerId,
+            player.DisplayName,
+            DateTimeOffset.UtcNow,
+            context.RequestAborted));
+    }
+    catch (Exception)
+    {
+        return OnlineBattleProblem("OnlineBattleStoreUnavailable", "The online battle store is temporarily unavailable.", 503);
+    }
+});
+
+app.MapDelete("/api/online-battles/matchmaking", async (
+    HttpContext context,
+    GuestSessionService sessions,
+    OnlineBattleService onlineBattles) =>
+{
+    var player = await ResolvePlayerAsync(context, sessions);
+    if (player is null)
+    {
+        return SessionRequired();
+    }
+
+    try
+    {
+        return ToOnlineBattleResult(await onlineBattles.CancelQueueAsync(
+            player.PlayerId,
+            DateTimeOffset.UtcNow,
+            context.RequestAborted));
+    }
+    catch (Exception)
+    {
+        return OnlineBattleProblem("OnlineBattleStoreUnavailable", "The online battle store is temporarily unavailable.", 503);
+    }
+});
+
+app.MapGet("/api/online-battles/current", async (
+    HttpContext context,
+    GuestSessionService sessions,
+    OnlineBattleService onlineBattles) =>
+{
+    var player = await ResolvePlayerAsync(context, sessions);
+    if (player is null)
+    {
+        return SessionRequired();
+    }
+
+    try
+    {
+        return ToOnlineBattleResult(await onlineBattles.GetCurrentAsync(
+            player.PlayerId,
+            context.RequestAborted));
+    }
+    catch (Exception)
+    {
+        return OnlineBattleProblem("OnlineBattleStoreUnavailable", "The online battle store is temporarily unavailable.", 503);
+    }
+});
+
+app.MapGet("/api/online-battles/{roomId:guid}", async (
+    Guid roomId,
+    HttpContext context,
+    GuestSessionService sessions,
+    OnlineBattleService onlineBattles) =>
+{
+    var player = await ResolvePlayerAsync(context, sessions);
+    if (player is null)
+    {
+        return SessionRequired();
+    }
+
+    try
+    {
+        return ToOnlineBattleResult(await onlineBattles.GetRoomAsync(
+            player.PlayerId,
+            roomId,
+            context.RequestAborted));
+    }
+    catch (Exception)
+    {
+        return OnlineBattleProblem("OnlineBattleStoreUnavailable", "The online battle store is temporarily unavailable.", 503);
+    }
+});
+
+app.MapPost("/api/online-battles/{roomId:guid}/commands", async (
+    Guid roomId,
+    DeployBattleRequest request,
+    HttpContext context,
+    GuestSessionService sessions,
+    OnlineBattleService onlineBattles) =>
+{
+    var player = await ResolvePlayerAsync(context, sessions);
+    if (player is null)
+    {
+        return SessionRequired();
+    }
+
+    try
+    {
+        return ToOnlineBattleResult(await onlineBattles.SubmitDeployAsync(
+            player.PlayerId,
+            roomId,
+            new DeployBattleCommand(request.CardId, request.Lane, request.X, request.Y),
+            DateTimeOffset.UtcNow,
+            context.RequestAborted));
+    }
+    catch (Exception)
+    {
+        return OnlineBattleProblem("OnlineBattleStoreUnavailable", "The online battle store is temporarily unavailable.", 503);
+    }
+});
+
+app.MapPost("/api/online-battles/{roomId:guid}/tick", async (
+    Guid roomId,
+    TickBattleRequest request,
+    HttpContext context,
+    GuestSessionService sessions,
+    OnlineBattleService onlineBattles) =>
+{
+    var player = await ResolvePlayerAsync(context, sessions);
+    if (player is null)
+    {
+        return SessionRequired();
+    }
+
+    try
+    {
+        return ToOnlineBattleResult(await onlineBattles.AdvanceAsync(
+            player.PlayerId,
+            roomId,
+            request.Ticks,
+            DateTimeOffset.UtcNow,
+            context.RequestAborted));
+    }
+    catch (Exception)
+    {
+        return OnlineBattleProblem("OnlineBattleStoreUnavailable", "The online battle store is temporarily unavailable.", 503);
+    }
+});
+
 app.Run();
 
 static async Task<Game.Domain.PlayerProfile?> ResolvePlayerAsync(
@@ -343,6 +498,33 @@ static IResult FriendProblem(string code, string detail, int statusCode, Friends
         {
             ["code"] = code,
             ["snapshot"] = snapshot
+        });
+}
+
+static IResult ToOnlineBattleResult(OnlineBattleServiceResult result)
+{
+    if (result.Succeeded)
+    {
+        return Results.Ok(result.State);
+    }
+
+    return OnlineBattleProblem(
+        result.ErrorCode ?? "OnlineBattleUnexpectedError",
+        "The online battle request could not be completed.",
+        result.StatusCode,
+        result.State);
+}
+
+static IResult OnlineBattleProblem(string code, string detail, int statusCode, OnlineBattleState? state = null)
+{
+    return Results.Problem(
+        title: code,
+        detail: detail,
+        statusCode: statusCode,
+        extensions: new Dictionary<string, object?>
+        {
+            ["code"] = code,
+            ["state"] = state
         });
 }
 

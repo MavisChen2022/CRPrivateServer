@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+VERIFIED
 
 ## Owner
 
@@ -82,9 +82,12 @@ result without ranked ladder, purchases, clans, chat, or full Clash Royale parit
 - API gate: `dotnet test CRPrivateServer.sln`
 - Web gate: `npm.cmd run test:web` and `npm.cmd run test:web:build`
 - Behavior gate: `npm.cmd run test:e2e`
+- Verified on 2026-07-18 with `npm.cmd test`: docs validation passed, web validation passed,
+  Vite build passed, `dotnet test CRPrivateServer.sln` passed with Domain 31, Application 14, and
+  API integration 31 tests, and Playwright passed 36/36 across desktop and mobile Chromium.
 
 ## Review Result
 
-GamePM, Dev, Asset, and QA approved starting this slice on 2026-07-18 as a two-guest online battle
-room MVP with matchmaking, cancel queue, shared server-authoritative commands, reconnect, result,
-mobile, reduced-motion, and public-safe asset fallback gates.
+GamePM, Dev, Asset, and QA verified this slice on 2026-07-18 as a two-guest online battle room MVP
+with matchmaking, cancel queue, shared server-authoritative commands, reconnect, result coverage,
+mobile, reduced-motion, owner isolation, and public-safe asset fallback gates.

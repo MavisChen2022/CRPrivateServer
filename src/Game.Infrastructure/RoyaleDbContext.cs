@@ -16,6 +16,9 @@ public sealed class RoyaleDbContext : DbContext
     public DbSet<BattleCommandEntity> BattleCommands => Set<BattleCommandEntity>();
     public DbSet<FriendCodeEntity> FriendCodes => Set<FriendCodeEntity>();
     public DbSet<FriendshipEntity> Friendships => Set<FriendshipEntity>();
+    public DbSet<MatchmakingQueueEntity> MatchmakingQueue => Set<MatchmakingQueueEntity>();
+    public DbSet<OnlineBattleRoomEntity> OnlineBattleRooms => Set<OnlineBattleRoomEntity>();
+    public DbSet<OnlineBattleCommandEntity> OnlineBattleCommands => Set<OnlineBattleCommandEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -109,6 +112,49 @@ public sealed class RoyaleDbContext : DbContext
             entity.HasIndex(x => x.RequesterPlayerId);
             entity.HasIndex(x => x.AddresseePlayerId);
         });
+
+        modelBuilder.Entity<MatchmakingQueueEntity>(entity =>
+        {
+            entity.ToTable("MATCHMAKING_QUEUE");
+            entity.HasKey(x => x.PlayerId);
+            entity.Property(x => x.PlayerId).HasColumnName("PLAYER_ID");
+            entity.Property(x => x.Status).HasColumnName("STATUS").IsRequired();
+            entity.Property(x => x.QueuedAt).HasColumnName("QUEUED_AT").IsRequired();
+            entity.Property(x => x.UpdatedAt).HasColumnName("UPDATED_AT").IsRequired();
+            entity.Property(x => x.MatchedRoomId).HasColumnName("MATCHED_ROOM_ID");
+            entity.HasIndex(x => x.Status);
+        });
+
+        modelBuilder.Entity<OnlineBattleRoomEntity>(entity =>
+        {
+            entity.ToTable("ONLINE_BATTLE_ROOMS");
+            entity.HasKey(x => x.RoomId);
+            entity.Property(x => x.RoomId).HasColumnName("ROOM_ID");
+            entity.Property(x => x.PlayerOneId).HasColumnName("PLAYER_ONE_ID").IsRequired();
+            entity.Property(x => x.PlayerTwoId).HasColumnName("PLAYER_TWO_ID").IsRequired();
+            entity.Property(x => x.Status).HasColumnName("STATUS").IsRequired();
+            entity.Property(x => x.SnapshotJson).HasColumnName("SNAPSHOT_JSON").IsRequired();
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.Property(x => x.UpdatedAt).HasColumnName("UPDATED_AT").IsRequired();
+            entity.Property(x => x.EndedAt).HasColumnName("ENDED_AT");
+            entity.HasIndex(x => x.PlayerOneId);
+            entity.HasIndex(x => x.PlayerTwoId);
+        });
+
+        modelBuilder.Entity<OnlineBattleCommandEntity>(entity =>
+        {
+            entity.ToTable("ONLINE_BATTLE_COMMANDS");
+            entity.HasKey(x => x.CommandId);
+            entity.Property(x => x.CommandId).HasColumnName("COMMAND_ID");
+            entity.Property(x => x.RoomId).HasColumnName("ROOM_ID").IsRequired();
+            entity.Property(x => x.PlayerId).HasColumnName("PLAYER_ID").IsRequired();
+            entity.Property(x => x.CommandType).HasColumnName("COMMAND_TYPE").IsRequired();
+            entity.Property(x => x.CommandJson).HasColumnName("COMMAND_JSON").IsRequired();
+            entity.Property(x => x.SubmittedAtTick).HasColumnName("SUBMITTED_AT_TICK").IsRequired();
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.Property(x => x.RejectedCode).HasColumnName("REJECTED_CODE");
+            entity.HasIndex(x => x.RoomId);
+        });
     }
 }
 
@@ -181,3 +227,35 @@ public sealed class FriendshipEntity
     public DateTimeOffset UpdatedAt { get; set; }
 }
 
+public sealed class MatchmakingQueueEntity
+{
+    public Guid PlayerId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public DateTimeOffset QueuedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public Guid? MatchedRoomId { get; set; }
+}
+
+public sealed class OnlineBattleRoomEntity
+{
+    public Guid RoomId { get; set; }
+    public Guid PlayerOneId { get; set; }
+    public Guid PlayerTwoId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string SnapshotJson { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
+    public DateTimeOffset? EndedAt { get; set; }
+}
+
+public sealed class OnlineBattleCommandEntity
+{
+    public Guid CommandId { get; set; }
+    public Guid RoomId { get; set; }
+    public Guid PlayerId { get; set; }
+    public string CommandType { get; set; } = string.Empty;
+    public string CommandJson { get; set; } = string.Empty;
+    public int SubmittedAtTick { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
+    public string? RejectedCode { get; set; }
+}

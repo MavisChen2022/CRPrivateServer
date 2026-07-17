@@ -150,6 +150,70 @@ test("reduced motion still allows friends interaction", async ({ page }) => {
   await expect(page.getByTestId("friends-empty-state")).toBeVisible();
 });
 
+test("online matchmaking can be cancelled before a match", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await page.getByTestId("online-battle-button").click();
+
+  await expect(page.getByTestId("online-waiting")).toBeVisible();
+  await expect(page.getByTestId("online-status")).toContainText("Waiting");
+  await page.getByTestId("cancel-online-button").click();
+
+  await expect(page.getByTestId("online-status")).toContainText("cancelled");
+  await expect(page.getByTestId("online-queue-button")).toBeVisible();
+});
+
+test("two guest players can match, deploy, and restore an online room", async ({ browser }) => {
+  const playerA = await openOnlinePage(browser);
+  const playerB = await openOnlinePage(browser);
+  const spectator = await browser.newContext();
+
+  try {
+    await expect(playerA.page.getByTestId("online-ready")).toBeVisible({ timeout: 10000 });
+    await expect(playerB.page.getByTestId("online-ready")).toBeVisible({ timeout: 10000 });
+
+    const roomA = await playerA.page.getByTestId("online-room-id").innerText();
+    const roomB = await playerB.page.getByTestId("online-room-id").innerText();
+    const fullRoomId = await playerA.page.getByTestId("online-room-full-id").innerText();
+    expect(roomA).toBe(roomB);
+
+    const spectatorPage = await spectator.newPage();
+    await spectatorPage.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
+    const forbidden = await spectator.request.get(`http://127.0.0.1:5173/api/online-battles/${fullRoomId}`);
+    expect(forbidden.status()).toBe(403);
+
+    await playerA.page.getByTestId("online-deploy-card-training-knight").click();
+    await expect(playerA.page.getByTestId("online-unit")).toBeVisible();
+    await expect.poll(async () => Number(await playerB.page.getByTestId("online-player-one-hp").innerText()), {
+      timeout: 8000
+    }).toBeLessThan(1000);
+
+    await playerA.page.reload({ waitUntil: "domcontentloaded" });
+    await expect(playerA.page.getByTestId("online-ready")).toBeVisible();
+    await expect(playerA.page.getByTestId("online-room-id")).toHaveText(roomA);
+  } finally {
+    await playerA.context.close();
+    await playerB.context.close();
+    await spectator.close();
+  }
+});
+
+test("reduced motion still allows online battle interaction", async ({ browser }) => {
+  const playerA = await openOnlinePage(browser, true);
+  const playerB = await openOnlinePage(browser, true);
+
+  try {
+    await expect(playerA.page.getByTestId("online-ready")).toBeVisible({ timeout: 10000 });
+    await expect(playerB.page.getByTestId("online-ready")).toBeVisible({ timeout: 10000 });
+    await playerB.page.getByTestId("online-deploy-card-training-archer").click();
+
+    await expect(playerB.page.getByTestId("online-unit")).toBeVisible();
+    await expect(playerB.page.getByTestId("online-status")).toContainText(/active|deployed/i);
+  } finally {
+    await playerA.context.close();
+    await playerB.context.close();
+  }
+});
 
 test("start battle opens a playable solo sandbox", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -253,5 +317,20 @@ async function openFriendsPage(browser: Browser) {
   const displayName = await page.getByTestId("player-display-name").innerText();
   await page.getByTestId("friends-button").click();
   await expect(page.getByTestId("friends-ready")).toBeVisible();
+  return { context, page, displayName };
+}
+
+async function openOnlinePage(browser: Browser, reducedMotion = false) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  if (reducedMotion) {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+  }
+
+  await page.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("home-ready")).toBeVisible();
+  const displayName = await page.getByTestId("player-display-name").innerText();
+  await page.getByTestId("online-battle-button").click();
+  await expect(page.getByTestId("online-waiting").or(page.getByTestId("online-ready"))).toBeVisible();
   return { context, page, displayName };
 }

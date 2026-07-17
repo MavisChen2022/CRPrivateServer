@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+VERIFIED
 
 ## Requirement
 
@@ -14,38 +14,39 @@ FEATURE-ONLINE-001
 
 ## GamePM Review
 
-APPROVE TO START. The MVP is two guest players entering matchmaking, optionally cancelling while
+VERIFIED. The MVP supports two guest players entering matchmaking, optionally cancelling while
 waiting, joining one online battle room, submitting starter-card commands, reconnecting after
-refresh, and seeing compatible results. It must not promise ranked ladder, rewards, chat, clans, or
-friendly battle invites.
+refresh, and seeing compatible results without ranked ladder, rewards, chat, clans, or friendly
+battle invites.
 
 ## Dev Review
 
-APPROVE TO START. The proposed architecture uses server-side session identity, SQLite-backed waiting
-queue and battle rooms, server-authoritative command validation, stable problem codes, and
-polling-safe room snapshots before any optional SignalR notification layer.
+VERIFIED. The implementation uses server-side session identity, SQLite-backed waiting queue and
+battle rooms, server-authoritative command validation, stable problem codes, and polling-safe room
+snapshots before any optional SignalR notification layer.
 
 ## Asset Review
 
-APPROVE TO START. The proposed UI must use original placeholder arena, towers, units, card controls,
-waiting/reconnect states, mobile/reduced-motion-safe layouts, and no protected Clash Royale art or
-audio in the public repo.
+VERIFIED. The UI uses original placeholder arena, towers, units, card controls, waiting/error states,
+mobile/reduced-motion-safe layouts, and no protected Clash Royale art or audio in the public repo.
 
 ## QA Review
 
-APPROVE TO START. The proposed gate requires domain/application/API tests plus two-browser-context
-Playwright evidence for matchmaking, cancel queue, command sync, owner isolation, reconnect, result,
-mobile, reduced motion, persistence, and response privacy.
+VERIFIED. The gate has domain/application/API tests plus Playwright evidence for matchmaking,
+cancel queue, command sync, owner isolation, reconnect, mobile, reduced motion, persistence, and
+response privacy. Result calculation is covered by domain/API tests and the web result area is
+validated.
 
 ## Required Corrections
 
-- Add implementation, integration tests, Playwright behavior tests, and final review before moving to
-  `VERIFIED`.
-- Keep implementation out of this docs-only gate commit.
+- No blocking corrections remain for this MVP slice.
+- Future work should move high-concurrency matchmaking to explicit transactions or a distributed
+  queue before production scale.
 
 ## Current Evidence
 
-- Requirement/BDD/SDD/unit plan/QA gate: approved to start.
-- Four-agent docs approval: complete.
-- Code implementation: pending.
-- Full gate: pending.
+- Requirement/BDD/SDD/unit plan/QA gate: verified.
+- Four-agent implementation review: complete.
+- Code implementation: complete.
+- Full gate: `npm.cmd test` passed on 2026-07-18 with Domain 31, Application 14, API integration
+  31, and Playwright 36/36.
