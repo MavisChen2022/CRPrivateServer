@@ -16,7 +16,13 @@ const requiredFiles = [
   "specs/sdd/SDD-FEATURE-BATTLE-001.md",
   "specs/test-plans/UNIT-FEATURE-BATTLE-001.md",
   "specs/test-plans/QA-GATE-FEATURE-BATTLE-001.md",
-  "specs/review-reports/AGENT-REVIEW-FEATURE-BATTLE-001.md"
+  "specs/review-reports/AGENT-REVIEW-FEATURE-BATTLE-001.md",
+  "specs/requirements/FEATURE-FRIEND-001.md",
+  "specs/features/friend-code.feature",
+  "specs/sdd/SDD-FEATURE-FRIEND-001.md",
+  "specs/test-plans/UNIT-FEATURE-FRIEND-001.md",
+  "specs/test-plans/QA-GATE-FEATURE-FRIEND-001.md",
+  "specs/review-reports/AGENT-REVIEW-FEATURE-FRIEND-001.md"
 ];
 
 const requiredReadmeSections = [
@@ -170,9 +176,14 @@ if (existsSync("specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md")) {
   }
 }
 
-for (const featureId of ["FEATURE-BATTLE-001"]) {
+const featureDocuments = {
+  "FEATURE-BATTLE-001": "battle-sandbox.feature",
+  "FEATURE-FRIEND-001": "friend-code.feature"
+};
+
+for (const [featureId, featureFile] of Object.entries(featureDocuments)) {
   const requirementPath = `specs/requirements/${featureId}.md`;
-  const featurePath = "specs/features/battle-sandbox.feature";
+  const featurePath = `specs/features/${featureFile}`;
   const sddPath = `specs/sdd/SDD-${featureId}.md`;
   const unitPath = `specs/test-plans/UNIT-${featureId}.md`;
   const qaPath = `specs/test-plans/QA-GATE-${featureId}.md`;

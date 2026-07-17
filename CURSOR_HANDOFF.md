@@ -58,7 +58,8 @@ and Playwright e2e.
    - QA: gate criteria, automated tests, evidence.
 2. Start the next feature slice:
    - `FEATURE-BATTLE-001`: verified MVP; next work is polish, richer results, migrations, and optional safe audio.
-   - `FEATURE-FRIEND-001`: placeholder to real friend list API.
+   - `FEATURE-FRIEND-001`: next active slice; docs gate created for friend code, request lifecycle,
+     friends list, SQLite persistence, and two-context Playwright coverage.
    - Deck/card data import pipeline with public-safe asset handling.
 
 ## Commands

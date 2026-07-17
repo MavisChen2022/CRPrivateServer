@@ -3,7 +3,7 @@
 | Requirement ID | BDD Feature | SDD | Unit Tests | Integration Tests | Behavior Tests | Status |
 |---|---|---|---|---|---|---|
 | FEATURE-SESSION-001 | `specs/features/guest-session.feature` | `specs/sdd/SDD-FEATURE-SESSION-001.md` | `specs/test-plans/UNIT-FEATURE-SESSION-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | APPROVED |
-| FEATURE-FRIEND-001 | Pending | Pending | Pending | Pending | Pending | DRAFT |
+| FEATURE-FRIEND-001 | `specs/features/friend-code.feature` | `specs/sdd/SDD-FEATURE-FRIEND-001.md` | `specs/test-plans/UNIT-FEATURE-FRIEND-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | IN_REVIEW |
 | FEATURE-BATTLE-001 | `specs/features/battle-sandbox.feature` | `specs/sdd/SDD-FEATURE-BATTLE-001.md` | `specs/test-plans/UNIT-FEATURE-BATTLE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
 
 ## Status Rules
@@ -27,3 +27,4 @@
 - FEATURE-BATTLE-001 is `VERIFIED` after `npm.cmd test` passed on 2026-07-18.
 - FEATURE-BATTLE-001 unit/API coverage includes deterministic battle start, valid deploy, invalid card/lane/placement, insufficient elixir, tick movement/damage/elixir regen, tower win, timeout, session-required API, owner-only access, invalid command code, and SQLite restart persistence.
 - FEATURE-BATTLE-001 Playwright coverage includes Start Battle, solo arena rendering, deploy/elixir change, enemy tower HP damage, refresh persistence, reduced motion, and desktop/mobile Chromium projects.
+- FEATURE-FRIEND-001 entered `IN_REVIEW` on 2026-07-18 after GamePM, Dev, Asset, and QA approved starting a friend-code/request/list MVP.
