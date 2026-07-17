@@ -5,7 +5,8 @@ const requiredFiles = [
   "README.md",
   "TRACEABILITY_MATRIX.md",
   "specs/requirements/FEATURE-SESSION-001.md",
-  "specs/features/guest-session.feature"
+  "specs/features/guest-session.feature",
+  "specs/sdd/SDD-FEATURE-SESSION-001.md"
 ];
 
 const requiredReadmeSections = [
@@ -69,6 +70,38 @@ if (existsSync("specs/features/guest-session.feature")) {
   for (const text of ["@FEATURE-SESSION-001", "Feature:", "Scenario:", "Then"]) {
     if (!feature.includes(text)) {
       fail(`guest-session.feature is missing "${text}"`);
+    }
+  }
+}
+
+const sddSections = [
+  "## Status",
+  "## Requirement",
+  "## 1. Purpose",
+  "## 2. User Flow",
+  "## 3. Business Rules",
+  "## 4. System Components",
+  "## 5. API Contract",
+  "## 6. SQLite Data Design",
+  "## 7. Redis Cache Key Design",
+  "## 8. SignalR Contract",
+  "## 9. State Flow",
+  "## 10. Error Handling",
+  "## 11. Security and Anti-Cheat",
+  "## 12. Transactions, Concurrency, and Idempotency",
+  "## 13. Monitoring and Logs",
+  "## 14. Unit Test Cases",
+  "## 15. Integration Test Cases",
+  "## 16. Behavior Test Cases",
+  "## 17. Rollback and Migration",
+  "## Review Evidence"
+];
+
+if (existsSync("specs/sdd/SDD-FEATURE-SESSION-001.md")) {
+  const sdd = readFileSync("specs/sdd/SDD-FEATURE-SESSION-001.md", "utf8");
+  for (const section of sddSections) {
+    if (!sdd.includes(section)) {
+      fail(`SDD-FEATURE-SESSION-001.md is missing "${section}"`);
     }
   }
 }
