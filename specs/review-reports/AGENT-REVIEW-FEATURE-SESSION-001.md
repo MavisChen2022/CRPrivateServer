@@ -14,68 +14,69 @@ FEATURE-SESSION-001
 
 ## StudioLead Summary
 
-The four-agent review was run after the initial skeleton was committed. All four specialist
-agents rejected release readiness. The current code builds and has a useful first skeleton, but
-the repository previously overstated approval status. This report corrects the gate state and
-records the next required work.
+The four-agent review was rerun after the guest-session persistence and UI placeholder work.
+The code now has a stronger tested slice, but FEATURE-SESSION-001 remains blocked from feature
+approval until behavior evidence and the remaining hardening tests are added.
 
 ## GamePM Review
 
 Status: CHANGES_REQUESTED
 
-- The player-visible guest entry promise is valid.
-- Start Battle, Friends, and Deck buttons currently do nothing and over-promise the MVP.
-- Missing scenarios include API retry, expired cookie recovery, mobile, reduced motion, and
-  multi-tab expectations.
-- Requested next documents: behavior test plan, home-screen UX states, battle-entry placeholder,
-  deck empty state, and friends empty state.
+- The player-visible guest entry promise remains valid.
+- UX-BDD addendum now covers guest home placeholders, API retry, expired-cookie recovery,
+  mobile, reduced motion, and multi-tab expectations.
+- Traceability now records xUnit and partial API integration evidence.
+- Approval remains blocked until passing behavior evidence is linked.
 
 ## Dev Review
 
-Status: CHANGES_REQUESTED
+Status: APPROVE for the persistence slice; CHANGES_REQUESTED for full feature readiness
 
-- Current implementation uses an in-memory singleton instead of the SDD's SQLite infrastructure.
-- No `Game.Infrastructure`, EF Core model, migration, repository, or transaction exists.
-- The raw token generator and hash strategy are acceptable only as temporary skeleton code.
-- Requested next code tasks: add persistence, repository interfaces, transaction handling,
-  real xUnit tests, API integration tests, and Playwright behavior coverage.
+- SQLite-backed guest session persistence is implemented in `Game.Infrastructure`.
+- API startup creates the SQLite schema, and `/api/session` reuses valid cookie-backed sessions.
+- Raw session tokens stay in the cookie while the database stores token hashes only.
+- Cookies use `HttpOnly`, `SameSite=Lax`, and `Secure` outside Development.
+- Follow-up hardening: add restart-level persistence coverage and additional store failure cases.
 
 ## Asset Review
 
-Status: CHANGES_REQUESTED
+Status: CHANGES_REQUESTED, partial UI and resolver corrections applied
 
-- Basic loading, error, and ready states exist, but empty states are missing.
-- Phaser canvas needs accessible labeling and fallback text.
-- Reduced motion is only sampled at initial render.
+- Basic loading, error, and ready states exist. Command placeholder states now cover the
+  Start Battle, Friends, and Deck empty/locked interactions.
+- Phaser canvas now has an accessible label and fallback description.
+- Reduced motion now updates when the operating system preference changes.
+- `assetResolver.ts` defines a public-safe local imported asset manifest under `assets/imported/`.
+- `battlePreview.ts` attempts local arena, tower, and deploy SFX assets first, then falls back
+  to original placeholder drawing when imported assets are missing.
+- The asset policy is documented in `assets/README.md`: keep `assets/imported/` ignored and
+  do not commit protected Clash assets to a public repository.
 - Phaser is bundled into the main page and should later be lazy-loaded.
-- The asset policy is directionally correct: keep `assets/imported/` ignored and do not commit
-  protected Clash assets to a public repository.
 
 ## QA Review
 
 Status: CHANGES_REQUESTED
 
-- `npm.cmd test` passes, but it does not prove integration or behavior readiness.
-- The current test project is a console smoke runner, not xUnit.
-- Missing tests include no-cookie session creation, valid cookie reuse, invalid cookie replacement,
-  cookie flags, no token exposure, tampered player id, Playwright Gherkin flows, and persistence
-  across restart once SQLite is implemented.
+- `npm.cmd test` passes with docs validation, web validation, Vite build, and .NET tests.
+- Domain, application, and API integration tests now run through xUnit.
+- API integration covers no-cookie session creation, valid cookie reuse, invalid cookie replacement,
+  cookie flags, and no token exposure.
+- Missing tests include Playwright Gherkin flows, expired-cookie recovery, store unavailable
+  `503 SessionStoreUnavailable`, restart persistence, and full cookie expiry/Secure policy.
 
 ## Required Corrections
 
-1. Keep traceability at `CHANGES_REQUESTED` until xUnit, API integration, and Playwright evidence exist.
-2. Add `Game.Infrastructure` with SQLite-backed guest session persistence.
-3. Replace in-memory session storage or explicitly revise the SDD if in-memory is only a temporary spike.
-4. Add real xUnit tests for domain and application service behavior.
-5. Add API integration tests with `WebApplicationFactory`.
-6. Add Playwright behavior tests for `guest-session.feature`.
-7. Add UI placeholder behavior and accessible canvas fallback.
+1. Keep traceability at `CHANGES_REQUESTED` until Playwright behavior evidence exists.
+2. Add Playwright behavior tests for `guest-session.feature`.
+3. Add API integration tests for expired-cookie recovery, store-unavailable response, restart
+   persistence, and full cookie expiry/Secure policy.
+4. Lazy-load Phaser or split the web bundle before production release.
+5. Keep protected Clash Royale image and sound assets out of Git; use `assets/imported/` only locally.
 
 ## Evidence
 
-- GamePM subagent: CHANGES_REQUESTED.
-- Dev subagent: CHANGES_REQUESTED.
-- Asset subagent: CHANGES_REQUESTED.
-- QA subagent: CHANGES_REQUESTED.
-- StudioLead action: statuses corrected and review report added.
-
+- GamePM subagent: CHANGES_REQUESTED; scenarios are now documented, behavior evidence still missing.
+- Dev subagent: APPROVE for guest-session persistence slice.
+- Asset subagent: CHANGES_REQUESTED; public-safe placeholder UI is usable, resolver/fallback support added after review.
+- QA subagent: CHANGES_REQUESTED; xUnit/API coverage improved, Playwright and hardening tests still missing.
+- StudioLead evidence: `npm.cmd test` passed on 2026-07-17.

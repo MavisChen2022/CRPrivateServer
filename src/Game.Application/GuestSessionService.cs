@@ -1,22 +1,45 @@
 using Game.Domain;
-using System.Collections.Concurrent;
+using System.Security.Cryptography;
 
 namespace Game.Application;
 
 public sealed record GuestSessionResult(PlayerProfile Player, string RawSessionToken, bool WasCreated);
 
+public sealed record StoredGuestSession(SessionToken Token, PlayerProfile Player);
+
+public interface IGuestSessionStore
+{
+    Task<StoredGuestSession?> FindByTokenHashAsync(
+        string tokenHash,
+        DateTimeOffset now,
+        CancellationToken cancellationToken);
+
+    Task SaveGuestSessionAsync(
+        SessionToken token,
+        PlayerProfile player,
+        CancellationToken cancellationToken);
+}
+
 public sealed class GuestSessionService
 {
     private static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);
-    private readonly ConcurrentDictionary<string, (SessionToken Token, PlayerProfile Player)> _sessions = new();
+    private readonly IGuestSessionStore _store;
 
-    public GuestSessionResult GetOrCreate(string? rawSessionToken, DateTimeOffset now)
+    public GuestSessionService(IGuestSessionStore store)
+    {
+        _store = store;
+    }
+
+    public async Task<GuestSessionResult> GetOrCreateAsync(
+        string? rawSessionToken,
+        DateTimeOffset now,
+        CancellationToken cancellationToken)
     {
         if (!string.IsNullOrWhiteSpace(rawSessionToken))
         {
             var tokenHash = SessionToken.Hash(rawSessionToken);
-            if (_sessions.TryGetValue(tokenHash, out var existing) &&
-                existing.Token.IsValid(rawSessionToken, now))
+            var existing = await _store.FindByTokenHashAsync(tokenHash, now, cancellationToken);
+            if (existing is not null && existing.Token.IsValid(rawSessionToken, now))
             {
                 return new GuestSessionResult(existing.Player, rawSessionToken, WasCreated: false);
             }
@@ -26,14 +49,14 @@ public sealed class GuestSessionService
         var token = CreateRawToken();
         var player = PlayerProfile.CreateGuest(userId, CreateGuestDisplayName());
         var session = SessionToken.Issue(userId, token, now, SessionLifetime);
-        _sessions[session.TokenHash] = (session, player);
+        await _store.SaveGuestSessionAsync(session, player, cancellationToken);
+
         return new GuestSessionResult(player, token, WasCreated: true);
     }
 
     private static string CreateRawToken()
     {
-        return Convert.ToBase64String(Guid.NewGuid().ToByteArray()) +
-            Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+        return Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
     }
 
     private static string CreateGuestDisplayName()
@@ -41,4 +64,3 @@ public sealed class GuestSessionService
         return $"Player{Random.Shared.Next(100000, 999999)}";
     }
 }
-

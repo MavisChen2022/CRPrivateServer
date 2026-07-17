@@ -23,6 +23,20 @@ button {
   padding: 0 18px;
 }
 
+button:hover {
+  background: #ffd965;
+}
+
+button:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+}
+
+button[aria-pressed="true"] {
+  background: #ffffff;
+  color: #12304d;
+}
+
 .shell {
   min-height: 100vh;
   padding: 24px;
@@ -99,6 +113,26 @@ h1 {
   gap: 12px;
 }
 
+.command-placeholder {
+  background: #193856;
+  border: 1px solid #2f5f8a;
+  border-radius: 8px;
+  color: #d8ecff;
+  min-height: 132px;
+  padding: 14px 16px;
+}
+
+.command-placeholder h2 {
+  color: #ffffff;
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.command-placeholder p {
+  line-height: 1.45;
+  margin: 0;
+}
+
 .guest-warning,
 .status-panel {
   background: #193856;
@@ -107,6 +141,17 @@ h1 {
   margin: 20px auto 0;
   max-width: 980px;
   padding: 14px 16px;
+}
+
+.sr-only {
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
 }
 
 @media (max-width: 760px) {
@@ -137,4 +182,3 @@ h1 {
     transition-duration: 0.001ms !important;
   }
 }
-

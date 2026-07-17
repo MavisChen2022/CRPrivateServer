@@ -8,6 +8,7 @@ const requiredFiles = [
   "specs/features/guest-session.feature",
   "specs/sdd/SDD-FEATURE-SESSION-001.md",
   "specs/test-plans/UNIT-FEATURE-SESSION-001.md",
+  "specs/test-plans/QA-GATE-FEATURE-SESSION-001.md",
   "specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md"
 ];
 
@@ -113,6 +114,25 @@ if (existsSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md")) {
   for (const text of ["## Status", "CHANGES_REQUESTED", "## Test Cases", "## Execution", "## Evidence"]) {
     if (!plan.includes(text)) {
       fail(`UNIT-FEATURE-SESSION-001.md is missing "${text}"`);
+    }
+  }
+}
+
+if (existsSync("specs/test-plans/QA-GATE-FEATURE-SESSION-001.md")) {
+  const plan = readFileSync("specs/test-plans/QA-GATE-FEATURE-SESSION-001.md", "utf8");
+  for (const text of [
+    "## Status",
+    "CHANGES_REQUESTED",
+    "## Required Test Suites",
+    "## xUnit Unit Tests",
+    "## API Integration Tests",
+    "## Playwright Behavior Tests",
+    "## Cookie and Security Cases",
+    "## Evidence Criteria",
+    "## Current Gate Result"
+  ]) {
+    if (!plan.includes(text)) {
+      fail(`QA-GATE-FEATURE-SESSION-001.md is missing "${text}"`);
     }
   }
 }

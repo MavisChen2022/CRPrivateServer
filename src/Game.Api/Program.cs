@@ -1,16 +1,44 @@
+using Game.Application;
+using Game.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSingleton<Game.Application.GuestSessionService>();
+var connectionString = builder.Configuration.GetConnectionString("GameDatabase")
+    ?? "Data Source=data/royale.db";
+EnsureSqliteDirectoryExists(connectionString);
+
+builder.Services.AddGameInfrastructure(connectionString);
+builder.Services.AddScoped<GuestSessionService>();
 
 var app = builder.Build();
+await app.Services.EnsureGameDatabaseAsync();
 
 app.MapGet("/", () => Results.Redirect("/api/session"));
 
 app.MapGet("/api/health", () => Results.Ok(new { status = "ok" }));
 
-app.MapGet("/api/session", (HttpContext context, Game.Application.GuestSessionService sessions) =>
+app.MapGet("/api/session", async (HttpContext context, GuestSessionService sessions) =>
 {
     var rawToken = context.Request.Cookies["royale_session"];
-    var result = sessions.GetOrCreate(rawToken, DateTimeOffset.UtcNow);
+    GuestSessionResult result;
+
+    try
+    {
+        result = await sessions.GetOrCreateAsync(
+            rawToken,
+            DateTimeOffset.UtcNow,
+            context.RequestAborted);
+    }
+    catch (Exception)
+    {
+        return Results.Problem(
+            title: "Session store unavailable",
+            detail: "The guest session store is temporarily unavailable.",
+            statusCode: StatusCodes.Status503ServiceUnavailable,
+            extensions: new Dictionary<string, object?>
+            {
+                ["code"] = "SessionStoreUnavailable"
+            });
+    }
 
     if (result.WasCreated)
     {
@@ -35,3 +63,24 @@ app.MapGet("/api/session", (HttpContext context, Game.Application.GuestSessionSe
 });
 
 app.Run();
+
+static void EnsureSqliteDirectoryExists(string connectionString)
+{
+    const string prefix = "Data Source=";
+    if (!connectionString.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+    {
+        return;
+    }
+
+    var path = connectionString[prefix.Length..].Trim();
+    if (string.IsNullOrWhiteSpace(Path.GetDirectoryName(path)))
+    {
+        return;
+    }
+
+    Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+}
+
+public partial class Program
+{
+}
