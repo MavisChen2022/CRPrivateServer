@@ -3,7 +3,9 @@ import { join } from "node:path";
 
 const requiredFiles = [
   "README.md",
-  "TRACEABILITY_MATRIX.md"
+  "TRACEABILITY_MATRIX.md",
+  "specs/requirements/FEATURE-SESSION-001.md",
+  "specs/features/guest-session.feature"
 ];
 
 const requiredReadmeSections = [
@@ -39,6 +41,34 @@ if (existsSync("TRACEABILITY_MATRIX.md")) {
   for (const requirementId of ["FEATURE-SESSION-001", "FEATURE-FRIEND-001", "FEATURE-BATTLE-001"]) {
     if (!matrix.includes(requirementId)) {
       fail(`TRACEABILITY_MATRIX.md is missing ${requirementId}`);
+    }
+  }
+}
+
+const requirementChecks = [
+  "## Status",
+  "APPROVED",
+  "## Owner",
+  "## Reviewers",
+  "## Acceptance Criteria",
+  "## Scenarios",
+  "## Test Evidence"
+];
+
+if (existsSync("specs/requirements/FEATURE-SESSION-001.md")) {
+  const requirement = readFileSync("specs/requirements/FEATURE-SESSION-001.md", "utf8");
+  for (const text of requirementChecks) {
+    if (!requirement.includes(text)) {
+      fail(`FEATURE-SESSION-001.md is missing "${text}"`);
+    }
+  }
+}
+
+if (existsSync("specs/features/guest-session.feature")) {
+  const feature = readFileSync("specs/features/guest-session.feature", "utf8");
+  for (const text of ["@FEATURE-SESSION-001", "Feature:", "Scenario:", "Then"]) {
+    if (!feature.includes(text)) {
+      fail(`guest-session.feature is missing "${text}"`);
     }
   }
 }

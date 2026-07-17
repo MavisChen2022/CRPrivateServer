@@ -2,7 +2,7 @@
 
 | Requirement ID | BDD Feature | SDD | Unit Tests | Integration Tests | Behavior Tests | Status |
 |---|---|---|---|---|---|---|
-| FEATURE-SESSION-001 | `specs/features/guest-session.feature` | Pending | Pending | Pending | Pending | DRAFT |
+| FEATURE-SESSION-001 | `specs/features/guest-session.feature` | Pending | Pending | Pending | Pending | APPROVED |
 | FEATURE-FRIEND-001 | Pending | Pending | Pending | Pending | Pending | DRAFT |
 | FEATURE-BATTLE-001 | Pending | Pending | Pending | Pending | Pending | DRAFT |
 
@@ -16,4 +16,3 @@
 - `RELEASED`: all release gates passed.
 - `CHANGES_REQUESTED`: a reviewer found a blocking issue.
 - `BLOCKED`: an external dependency prevents progress.
-
