@@ -6,6 +6,7 @@
 | FEATURE-FRIEND-001 | `specs/features/friend-code.feature` | `specs/sdd/SDD-FEATURE-FRIEND-001.md` | `specs/test-plans/UNIT-FEATURE-FRIEND-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
 | FEATURE-BATTLE-001 | `specs/features/battle-sandbox.feature` | `specs/sdd/SDD-FEATURE-BATTLE-001.md` | `specs/test-plans/UNIT-FEATURE-BATTLE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
 | FEATURE-ONLINE-001 | `specs/features/online-battle.feature` | `specs/sdd/SDD-FEATURE-ONLINE-001.md` | `specs/test-plans/UNIT-FEATURE-ONLINE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | VERIFIED |
+| FEATURE-FRIENDLY-BATTLE-001 | `specs/features/friendly-battle.feature` | `specs/sdd/SDD-FEATURE-FRIENDLY-BATTLE-001.md` | `specs/test-plans/UNIT-FEATURE-FRIENDLY-BATTLE-001.md` (`tests/Game.Domain.Tests`, `tests/Game.Application.Tests`) | `tests/Game.Api.IntegrationTests` | `tests/e2e` | APPROVED |
 
 ## Status Rules
 
@@ -37,3 +38,7 @@
   persistence, placeholder Online Battle UI, waiting/cancel UI, two-context match/deploy/refresh,
   owner isolation through browser API context, desktop/mobile Chromium, reduced-motion regression,
   and public-safe asset fallback.
+- FEATURE-FRIENDLY-BATTLE-001 docs gate is `APPROVED` on 2026-07-18 after each friendly battle
+  requirement/design/test/review document passed `npm.cmd run test:docs` and was pushed to GitHub.
+  Scope is accepted-friends-only non-ranked battle invites that reuse the verified online battle
+  room without trophies, rewards, chat, clans, rematches, spectator mode, or protected assets.
