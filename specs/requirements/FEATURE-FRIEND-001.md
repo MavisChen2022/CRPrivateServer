@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Owner
 
@@ -10,10 +10,10 @@ GamePM
 
 ## Reviewers
 
-- Dev: APPROVE TO START
-- QA: APPROVE TO START
-- Asset: APPROVE TO START
-- StudioLead Gate: IN_REVIEW
+- Dev: APPROVED
+- QA: APPROVED
+- Asset: APPROVED
+- StudioLead Gate: VERIFIED
 
 ## Player Goal
 
@@ -76,10 +76,13 @@ online presence, or friendly battle promises.
 
 - Full gate: `npm.cmd test`
 - Document gate: `npm.cmd run test:docs`
-- API gate: `dotnet test CRPrivateServer.sln`
-- Behavior gate: `npm.cmd run test:e2e`
+- API gate: `dotnet test CRPrivateServer.sln` passed on 2026-07-18 with Domain 21,
+  Application 9, and API integration 24 tests passing.
+- Web gate: `npm.cmd run test:web` and `npm.cmd run test:web:build` passed on 2026-07-18.
+- Behavior gate: `npm.cmd run test:e2e` passed 30/30 on 2026-07-18 across desktop and mobile Chromium.
 
 ## Review Result
 
-GamePM, Dev, Asset, and QA approved starting this slice on 2026-07-18 as a friend-code,
-friend-request, and friends-list MVP. Implementation approval requires domain/API/UI/e2e evidence.
+GamePM, Dev, Asset, and QA approved the implemented friend-code, friend-request, and friends-list
+MVP on 2026-07-18 after domain/API/web/e2e evidence passed. The slice does not approve chat,
+presence, clans, or friendly battle invites.

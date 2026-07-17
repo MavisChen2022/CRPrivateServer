@@ -4,7 +4,7 @@
 
 - Repository: `MavisChen2022/CRPrivateServer`
 - Branch: `main`
-- Latest verified local state: FEATURE-SESSION-001 approved and pushed in `71c3aae`; FEATURE-BATTLE-001 implementation is verified locally and ready to commit/push.
+- Latest verified local state: FEATURE-SESSION-001, FEATURE-BATTLE-001, and FEATURE-FRIEND-001 are verified on `main`. The friend feature implementation is ready for the next commit and push.
 - Full verification command passed on 2026-07-18:
 
 ```powershell
@@ -12,7 +12,8 @@ npm.cmd test
 ```
 
 This currently runs docs validation, web validation, Vite build, `dotnet test CRPrivateServer.sln`,
-and Playwright e2e.
+and Playwright e2e. Latest friend feature evidence includes Domain 21, Application 9, API
+integration 24, and Playwright 30/30 passing.
 
 ## Completed Slices
 
@@ -48,6 +49,18 @@ and Playwright e2e.
   - Web Start Battle opens a playable solo sandbox with placeholder arena, starter cards, HP, elixir,
     timer, refresh persistence, and reduced-motion-safe interaction.
   - E2E database setup now uses an absolute SQLite path so the API and cleanup scripts share one file.
+- FEATURE-FRIEND-001 implementation:
+  - Domain `FriendCode` and `FriendshipPair` enforce public-safe codes and normalized pair identity.
+  - Application `FriendService` owns stable code creation, pending requests, accept/reject, duplicate
+    guards, and public friends snapshots.
+  - Infrastructure stores `FRIEND_CODES` and `FRIENDSHIPS` in SQLite with uniqueness indexes.
+  - API exposes `GET /api/friends`, `POST /api/friends/requests`,
+    `POST /api/friends/requests/{friendshipId}/accept`, and
+    `POST /api/friends/requests/{friendshipId}/reject`.
+  - Web Friends view shows friend code, add-code form, incoming/outgoing requests, accepted friends,
+    CSS initials avatars, and `aria-live` status messages without protected assets or audio.
+  - Playwright covers invalid/self/duplicate errors, two-browser-context request/accept, refresh
+    persistence, desktop/mobile Chromium, and reduced-motion regression.
 
 ## Remaining QA Gate Work
 
@@ -58,8 +71,8 @@ and Playwright e2e.
    - QA: gate criteria, automated tests, evidence.
 2. Start the next feature slice:
    - `FEATURE-BATTLE-001`: verified MVP; next work is polish, richer results, migrations, and optional safe audio.
-   - `FEATURE-FRIEND-001`: next active slice; docs gate created for friend code, request lifecycle,
-     friends list, SQLite persistence, and two-context Playwright coverage.
+   - `FEATURE-FRIEND-001`: verified MVP; next work is copy button polish, clearer already-resolved
+     request codes, migrations, and optional friend battle planning as a separate feature.
    - Deck/card data import pipeline with public-safe asset handling.
 
 ## Commands

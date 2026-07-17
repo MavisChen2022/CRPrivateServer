@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -87,5 +87,8 @@ Asset, and QA reviews must be `APPROVED`.
 
 ## Current Gate Result
 
-IN_REVIEW. GamePM, Dev, Asset, and QA approved starting this slice on 2026-07-18. Implementation
-and automated evidence are pending.
+VERIFIED. Friend code, pending request, accept/reject, friends list, invalid/self/duplicate/unknown
+validation, unrelated-guest forbidden access, response privacy, refresh/restart persistence,
+desktop/mobile Friends UI, and reduced-motion-safe interaction are covered by automated tests.
+Full `npm.cmd test` passed on 2026-07-18 with docs/web/build gates, Domain 21, Application 9, API
+integration 24, and Playwright 30/30 passing.

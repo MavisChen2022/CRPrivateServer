@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Browser } from "@playwright/test";
 
 test.beforeEach(async ({ page }) => {
   page.on("console", (message) => {
@@ -59,14 +59,71 @@ test("invalid cookie recovers by issuing a replacement guest session", async ({ 
   expect(sessionCookie?.value).not.toBe("tampered-token");
 });
 
-test("secondary command placeholders stay honest", async ({ page }) => {
+test("deck placeholder stays honest", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
-
-  await page.getByTestId("friends-button").click();
-  await expect(page.getByTestId("command-placeholder")).toContainText("Friends list empty");
 
   await page.getByTestId("deck-button").click();
   await expect(page.getByTestId("command-placeholder")).toContainText("Starter deck pending");
+});
+
+test("friends panel shows a stable friend code and empty list", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await page.getByTestId("friends-button").click();
+
+  await expect(page.getByTestId("friends-ready")).toBeVisible();
+  await expect(page.getByTestId("friend-code")).toHaveText(/^[A-HJ-NP-Z2-9]{8}$/);
+  await expect(page.getByTestId("friends-empty-state")).toContainText("No friends yet.");
+  const friendCode = await page.getByTestId("friend-code").innerText();
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByTestId("friends-button").click();
+
+  await expect(page.getByTestId("friend-code")).toHaveText(friendCode);
+});
+
+test("friends panel rejects invalid and self friend codes", async ({ page }) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByTestId("friends-button").click();
+  const ownCode = await page.getByTestId("friend-code").innerText();
+
+  await page.getByTestId("friend-code-input").fill("BAD-CODE");
+  await page.getByTestId("send-friend-request-button").click();
+  await expect(page.getByTestId("friends-status")).toContainText("FriendCodeNotFound");
+
+  await page.getByTestId("friend-code-input").fill(ownCode);
+  await page.getByTestId("send-friend-request-button").click();
+  await expect(page.getByTestId("friends-status")).toContainText("CannotAddSelf");
+});
+
+test("two guest players can request, accept, and persist a friendship", async ({ browser }) => {
+  const playerA = await openFriendsPage(browser);
+  const playerB = await openFriendsPage(browser);
+
+  try {
+    const codeB = await playerB.page.getByTestId("friend-code").innerText();
+
+    await playerA.page.getByTestId("friend-code-input").fill(codeB.toLowerCase());
+    await playerA.page.getByTestId("send-friend-request-button").click();
+    await expect(playerA.page.getByTestId("outgoing-request-row")).toContainText(/Player\d{6}/);
+
+    await playerA.page.getByTestId("friend-code-input").fill(codeB);
+    await playerA.page.getByTestId("send-friend-request-button").click();
+    await expect(playerA.page.getByTestId("friends-status")).toContainText("DuplicateFriend");
+
+    await playerB.page.reload({ waitUntil: "domcontentloaded" });
+    await playerB.page.getByTestId("friends-button").click();
+    await expect(playerB.page.getByTestId("incoming-request-row")).toContainText(playerA.displayName);
+    await playerB.page.getByTestId("accept-friend-request-button").click();
+    await expect(playerB.page.getByTestId("friend-row")).toContainText(playerA.displayName);
+
+    await playerA.page.reload({ waitUntil: "domcontentloaded" });
+    await playerA.page.getByTestId("friends-button").click();
+    await expect(playerA.page.getByTestId("friend-row")).toContainText(playerB.displayName);
+  } finally {
+    await playerA.context.close();
+    await playerB.context.close();
+  }
 });
 
 test("reduced motion still renders a usable home and battle preview", async ({ page }) => {
@@ -79,6 +136,20 @@ test("reduced motion still renders a usable home and battle preview", async ({ p
   await expect(page.getByTestId("battle-preview").locator("canvas")).toBeVisible();
   await expect(page.getByTestId("start-battle-button")).toBeVisible();
 });
+
+test("reduced motion still allows friends interaction", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+
+  await page.getByTestId("friends-button").click();
+  await expect(page.getByTestId("friends-ready")).toBeVisible();
+  await page.getByTestId("friend-code-input").fill("ABCDEFG1");
+  await page.getByTestId("send-friend-request-button").click();
+
+  await expect(page.getByTestId("friends-status")).toContainText("FriendCodeNotFound");
+  await expect(page.getByTestId("friends-empty-state")).toBeVisible();
+});
+
 
 test("start battle opens a playable solo sandbox", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
@@ -173,3 +244,14 @@ test("client-side player id tampering does not change server identity", async ({
   await expect(page.getByTestId("home-ready")).toBeVisible();
   await expect(page.getByTestId("player-display-name")).toHaveText(playerName);
 });
+
+async function openFriendsPage(browser: Browser) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("home-ready")).toBeVisible();
+  const displayName = await page.getByTestId("player-display-name").innerText();
+  await page.getByTestId("friends-button").click();
+  await expect(page.getByTestId("friends-ready")).toBeVisible();
+  return { context, page, displayName };
+}

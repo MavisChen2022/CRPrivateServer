@@ -14,6 +14,8 @@ public sealed class RoyaleDbContext : DbContext
     public DbSet<SessionTokenEntity> SessionTokens => Set<SessionTokenEntity>();
     public DbSet<BattleSessionEntity> BattleSessions => Set<BattleSessionEntity>();
     public DbSet<BattleCommandEntity> BattleCommands => Set<BattleCommandEntity>();
+    public DbSet<FriendCodeEntity> FriendCodes => Set<FriendCodeEntity>();
+    public DbSet<FriendshipEntity> Friendships => Set<FriendshipEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,6 +82,33 @@ public sealed class RoyaleDbContext : DbContext
             entity.Property(x => x.RejectedCode).HasColumnName("REJECTED_CODE");
             entity.HasIndex(x => x.BattleId);
         });
+
+        modelBuilder.Entity<FriendCodeEntity>(entity =>
+        {
+            entity.ToTable("FRIEND_CODES");
+            entity.HasKey(x => x.PlayerId);
+            entity.Property(x => x.PlayerId).HasColumnName("PLAYER_ID");
+            entity.Property(x => x.Code).HasColumnName("FRIEND_CODE").IsRequired();
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.HasIndex(x => x.Code).IsUnique();
+        });
+
+        modelBuilder.Entity<FriendshipEntity>(entity =>
+        {
+            entity.ToTable("FRIENDSHIPS");
+            entity.HasKey(x => x.FriendshipId);
+            entity.Property(x => x.FriendshipId).HasColumnName("FRIENDSHIP_ID");
+            entity.Property(x => x.RequesterPlayerId).HasColumnName("REQUESTER_PLAYER_ID").IsRequired();
+            entity.Property(x => x.AddresseePlayerId).HasColumnName("ADDRESSEE_PLAYER_ID").IsRequired();
+            entity.Property(x => x.LowerPlayerId).HasColumnName("LOWER_PLAYER_ID").IsRequired();
+            entity.Property(x => x.HigherPlayerId).HasColumnName("HIGHER_PLAYER_ID").IsRequired();
+            entity.Property(x => x.Status).HasColumnName("STATUS").IsRequired();
+            entity.Property(x => x.CreatedAt).HasColumnName("CREATED_AT").IsRequired();
+            entity.Property(x => x.UpdatedAt).HasColumnName("UPDATED_AT").IsRequired();
+            entity.HasIndex(x => new { x.LowerPlayerId, x.HigherPlayerId }).IsUnique();
+            entity.HasIndex(x => x.RequesterPlayerId);
+            entity.HasIndex(x => x.AddresseePlayerId);
+        });
     }
 }
 
@@ -131,5 +160,24 @@ public sealed class BattleCommandEntity
     public int SubmittedAtTick { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
     public string? RejectedCode { get; set; }
+}
+
+public sealed class FriendCodeEntity
+{
+    public Guid PlayerId { get; set; }
+    public string Code { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+}
+
+public sealed class FriendshipEntity
+{
+    public Guid FriendshipId { get; set; }
+    public Guid RequesterPlayerId { get; set; }
+    public Guid AddresseePlayerId { get; set; }
+    public Guid LowerPlayerId { get; set; }
+    public Guid HigherPlayerId { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public DateTimeOffset CreatedAt { get; set; }
+    public DateTimeOffset UpdatedAt { get; set; }
 }
 

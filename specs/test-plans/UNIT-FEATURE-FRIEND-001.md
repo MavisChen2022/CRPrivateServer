@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -37,5 +37,7 @@ dotnet test CRPrivateServer.sln
 
 ## Evidence
 
-Pending implementation. GamePM, Dev, Asset, and QA approved starting this plan; tests are still
-pending.
+`dotnet test CRPrivateServer.sln` passed on 2026-07-18 with Domain 21, Application 9, and API
+integration 24 tests passing. Implemented evidence includes
+`tests/Game.Domain.Tests/FriendCodeTests.cs`, `tests/Game.Application.Tests/FriendServiceTests.cs`,
+and `tests/Game.Api.IntegrationTests/FriendApiTests.cs`.

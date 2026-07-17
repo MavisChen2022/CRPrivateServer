@@ -2,7 +2,7 @@
 
 ## Status
 
-IN_REVIEW
+VERIFIED
 
 ## Requirement
 
@@ -167,8 +167,12 @@ battle tables.
 
 ## Review Evidence
 
-- GamePM: APPROVE TO START, scoped as friend-code/request/list MVP only.
-- Dev: APPROVE TO START, requires server-side request lifecycle and normalized duplicate guard.
-- Asset: APPROVE TO START, requires public-safe initials/avatar UI and accessible states.
-- QA: APPROVE TO START, requires two-session API/e2e, invalid/self/duplicate/forbidden evidence.
-- StudioLead: IN_REVIEW until implementation and full gate evidence pass.
+- GamePM: APPROVED, scope remained friend-code/request/list MVP only.
+- Dev: APPROVED, server-side lifecycle, SQLite persistence, normalized duplicate guard, and
+  ProblemDetails snapshot handling are implemented.
+- Asset: APPROVED, Friends UI uses original CSS initials/placeholders, accessible status text, and
+  no protected social art or audio.
+- QA: APPROVED, domain/API/e2e evidence covers two-session request/accept, invalid/self/duplicate,
+  forbidden API behavior, refresh/restart persistence, desktop, mobile, and reduced motion coverage.
+- StudioLead: VERIFIED after full `npm.cmd test` passed on 2026-07-18, including docs/web/build,
+  Domain 21, Application 9, API integration 24, and Playwright 30/30 across desktop/mobile Chromium.

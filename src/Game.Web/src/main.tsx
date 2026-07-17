@@ -18,14 +18,10 @@ type PlayerSession = {
 
 type CommandKey = "battle" | "friends" | "deck";
 
-const commandCopy: Record<CommandKey, { title: string; body: string }> = {
+const commandCopy: Record<Exclude<CommandKey, "friends">, { title: string; body: string }> = {
   battle: {
     title: "Solo sandbox ready",
     body: "Start Battle opens a server-run training fight with placeholder cards and no matchmaking promise."
-  },
-  friends: {
-    title: "Friends list empty",
-    body: "Friend discovery will unlock after account persistence and social APIs are verified."
   },
   deck: {
     title: "Starter deck pending",
@@ -69,7 +65,36 @@ type BattleState =
   | { status: "ready"; snapshot: BattleSnapshot; message?: string }
   | { status: "error"; message: string };
 
-type ViewState = "home" | "battle";
+type FriendSummary = {
+  playerId: string;
+  displayName: string;
+  trophies: number;
+  shortPlayerId: string;
+  status: "Friend";
+};
+
+type FriendRequestSummary = {
+  friendshipId: string;
+  playerId: string;
+  displayName: string;
+  shortPlayerId: string;
+  status: "Pending";
+};
+
+type FriendsSnapshot = {
+  friendCode: string;
+  friends: FriendSummary[];
+  incomingRequests: FriendRequestSummary[];
+  outgoingRequests: FriendRequestSummary[];
+};
+
+type FriendsState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready"; snapshot: FriendsSnapshot; message?: string }
+  | { status: "error"; message: string };
+
+type ViewState = "home" | "battle" | "friends";
 
 function usePrefersReducedMotion() {
   const [reducedMotion, setReducedMotion] = useState(() =>
@@ -95,6 +120,7 @@ function App() {
   const [activeCommand, setActiveCommand] = useState<CommandKey>("battle");
   const [view, setView] = useState<ViewState>("home");
   const [battle, setBattle] = useState<BattleState>({ status: "idle" });
+  const [friends, setFriends] = useState<FriendsState>({ status: "idle" });
   const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
@@ -213,6 +239,20 @@ function App() {
     }
   };
 
+  const openFriends = async () => {
+    setActiveCommand("friends");
+    setView("friends");
+    setFriends({ status: "loading" });
+    try {
+      setFriends({ status: "ready", snapshot: await fetchFriends() });
+    } catch (error) {
+      setFriends({
+        status: "error",
+        message: error instanceof Error ? error.message : "Friend service is unavailable."
+      });
+    }
+  };
+
   if (view === "battle") {
     return (
       <BattleScreen
@@ -221,6 +261,17 @@ function App() {
         onBackHome={() => setView("home")}
         onReplay={startBattle}
         onSnapshot={setBattle}
+      />
+    );
+  }
+
+  if (view === "friends") {
+    return (
+      <FriendsScreen
+        friends={friends}
+        onBackHome={() => setView("home")}
+        onReload={openFriends}
+        onSnapshot={setFriends}
       />
     );
   }
@@ -270,7 +321,7 @@ function App() {
             type="button"
             data-testid="friends-button"
             aria-pressed={activeCommand === "friends"}
-            onClick={() => setActiveCommand("friends")}
+            onClick={openFriends}
           >
             Friends
           </button>
@@ -287,8 +338,8 @@ function App() {
             data-testid="command-placeholder"
             aria-live="polite"
           >
-            <h2>{commandCopy[activeCommand].title}</h2>
-            <p>{commandCopy[activeCommand].body}</p>
+            <h2>{commandCopy[activeCommand === "friends" ? "battle" : activeCommand].title}</h2>
+            <p>{commandCopy[activeCommand === "friends" ? "battle" : activeCommand].body}</p>
           </section>
         </nav>
       </section>
@@ -297,6 +348,227 @@ function App() {
         {session.player.guestWarning}
       </p>
     </main>
+  );
+}
+
+function FriendsScreen({
+  friends,
+  onBackHome,
+  onReload,
+  onSnapshot
+}: {
+  friends: FriendsState;
+  onBackHome: () => void;
+  onReload: () => void;
+  onSnapshot: (state: FriendsState) => void;
+}) {
+  const [friendCode, setFriendCode] = useState("");
+
+  if (friends.status === "loading" || friends.status === "idle") {
+    return (
+      <main className="shell friends-shell" data-testid="friends-loading">
+        <section className="status-panel">Loading friends...</section>
+      </main>
+    );
+  }
+
+  if (friends.status === "error") {
+    return (
+      <main className="shell friends-shell" data-testid="friends-error">
+        <section className="status-panel">
+          <h1>Friend connection problem</h1>
+          <p>{friends.message}</p>
+          <button type="button" data-testid="friends-retry-button" onClick={onReload}>
+            Retry
+          </button>
+          <button type="button" className="secondary-button" onClick={onBackHome}>
+            Back Home
+          </button>
+        </section>
+      </main>
+    );
+  }
+
+  const snapshot = friends.snapshot;
+
+  const submitRequest = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    try {
+      const next = await postFriendRequest(friendCode);
+      setFriendCode("");
+      onSnapshot({ status: "ready", snapshot: next, message: "Friend request sent." });
+    } catch (error) {
+      const nextSnapshot = error instanceof FriendRequestError && error.snapshot
+        ? error.snapshot
+        : snapshot;
+      onSnapshot({
+        status: "ready",
+        snapshot: nextSnapshot,
+        message: error instanceof Error ? error.message : "Friend request failed."
+      });
+    }
+  };
+
+  const updateRequest = async (friendshipId: string, action: "accept" | "reject") => {
+    try {
+      const next = await postFriendAction(friendshipId, action);
+      onSnapshot({
+        status: "ready",
+        snapshot: next,
+        message: action === "accept" ? "Friend added." : "Friend request rejected."
+      });
+    } catch (error) {
+      const nextSnapshot = error instanceof FriendRequestError && error.snapshot
+        ? error.snapshot
+        : snapshot;
+      onSnapshot({
+        status: "ready",
+        snapshot: nextSnapshot,
+        message: error instanceof Error ? error.message : "Friend update failed."
+      });
+    }
+  };
+
+  return (
+    <main className="shell friends-shell" data-testid="friends-ready">
+      <header className="battle-topbar">
+        <div>
+          <p className="eyebrow">Social</p>
+          <h1>Friends</h1>
+        </div>
+        <button type="button" className="secondary-button" data-testid="friends-back-home-button" onClick={onBackHome}>
+          Back Home
+        </button>
+      </header>
+
+      <section className="friends-layout">
+        <section className="friend-code-panel" aria-label="Your friend code">
+          <p className="eyebrow">Your code</p>
+          <strong data-testid="friend-code">{snapshot.friendCode}</strong>
+          <form className="friend-request-form" onSubmit={submitRequest}>
+            <label htmlFor="friend-code-input">Add by code</label>
+            <div>
+              <input
+                id="friend-code-input"
+                data-testid="friend-code-input"
+                value={friendCode}
+                onChange={(event) => setFriendCode(event.target.value)}
+                placeholder="ABCDEFGH"
+                autoComplete="off"
+              />
+              <button type="submit" data-testid="send-friend-request-button">
+                Send
+              </button>
+            </div>
+          </form>
+          <p className="friends-status" data-testid="friends-status" aria-live="polite">
+            {friends.message ?? "Share this code with another guest player."}
+          </p>
+        </section>
+
+        <section className="friends-list-panel" aria-label="Friends and requests">
+          <FriendSection title="Friends" emptyText="No friends yet." emptyTestId="friends-empty-state">
+            {snapshot.friends.map((friend) => (
+              <FriendRow
+                key={friend.playerId}
+                testId="friend-row"
+                displayName={friend.displayName}
+                meta={`${friend.trophies} trophies / ${friend.shortPlayerId}`}
+                badge={friend.status}
+              />
+            ))}
+          </FriendSection>
+
+          <FriendSection title="Incoming" emptyText="No incoming requests.">
+            {snapshot.incomingRequests.map((request) => (
+              <FriendRow
+                key={request.friendshipId}
+                testId="incoming-request-row"
+                displayName={request.displayName}
+                meta={request.shortPlayerId}
+                badge={request.status}
+              >
+                <button
+                  type="button"
+                  data-testid="accept-friend-request-button"
+                  onClick={() => updateRequest(request.friendshipId, "accept")}
+                >
+                  Accept
+                </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  data-testid="reject-friend-request-button"
+                  onClick={() => updateRequest(request.friendshipId, "reject")}
+                >
+                  Reject
+                </button>
+              </FriendRow>
+            ))}
+          </FriendSection>
+
+          <FriendSection title="Outgoing" emptyText="No outgoing requests.">
+            {snapshot.outgoingRequests.map((request) => (
+              <FriendRow
+                key={request.friendshipId}
+                testId="outgoing-request-row"
+                displayName={request.displayName}
+                meta={request.shortPlayerId}
+                badge={request.status}
+              />
+            ))}
+          </FriendSection>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function FriendSection({
+  title,
+  emptyText,
+  emptyTestId,
+  children
+}: {
+  title: string;
+  emptyText: string;
+  emptyTestId?: string;
+  children: React.ReactNode;
+}) {
+  const items = React.Children.toArray(children);
+  return (
+    <section className="friend-section">
+      <h2>{title}</h2>
+      {items.length > 0 ? items : <p className="friend-empty" data-testid={emptyTestId}>{emptyText}</p>}
+    </section>
+  );
+}
+
+function FriendRow({
+  testId,
+  displayName,
+  meta,
+  badge,
+  children
+}: {
+  testId: string;
+  displayName: string;
+  meta: string;
+  badge: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <div className="friend-row" data-testid={testId}>
+      <div className="friend-avatar" aria-hidden="true">
+        {displayName.slice(0, 2).toUpperCase()}
+      </div>
+      <div>
+        <strong>{displayName}</strong>
+        <span>{meta}</span>
+      </div>
+      <small>{badge}</small>
+      {children ? <div className="friend-actions">{children}</div> : null}
+    </div>
   );
 }
 
@@ -487,6 +759,66 @@ async function postBattle(path: string, body: unknown) {
   }
 
   return response.json() as Promise<BattleSnapshot>;
+}
+
+async function fetchFriends() {
+  const response = await fetch("/api/friends", { credentials: "include" });
+  if (!response.ok) {
+    throw new Error(await readProblemCode(response, "Friend load failed."));
+  }
+
+  return response.json() as Promise<FriendsSnapshot>;
+}
+
+async function postFriendRequest(friendCode: string) {
+  const response = await fetch("/api/friends/requests", {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ friendCode })
+  });
+
+  if (!response.ok) {
+    throw await readFriendProblem(response, "Friend request failed.");
+  }
+
+  return response.json() as Promise<FriendsSnapshot>;
+}
+
+async function postFriendAction(friendshipId: string, action: "accept" | "reject") {
+  const response = await fetch(`/api/friends/requests/${friendshipId}/${action}`, {
+    method: "POST",
+    credentials: "include"
+  });
+
+  if (!response.ok) {
+    throw await readFriendProblem(response, "Friend update failed.");
+  }
+
+  return response.json() as Promise<FriendsSnapshot>;
+}
+
+class FriendRequestError extends Error {
+  readonly snapshot?: FriendsSnapshot;
+
+  constructor(message: string, snapshot?: FriendsSnapshot) {
+    super(message);
+    this.name = "FriendRequestError";
+    this.snapshot = snapshot;
+  }
+}
+
+async function readFriendProblem(response: Response, fallback: string) {
+  try {
+    const problem = (await response.json()) as {
+      code?: string;
+      title?: string;
+      snapshot?: FriendsSnapshot;
+    };
+    return new FriendRequestError(problem.code ?? problem.title ?? fallback, problem.snapshot);
+  } catch {
+    return new FriendRequestError(fallback);
+  }
 }
 
 async function readProblemCode(response: Response, fallback: string) {
