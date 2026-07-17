@@ -7,7 +7,8 @@ const requiredFiles = [
   "specs/requirements/FEATURE-SESSION-001.md",
   "specs/features/guest-session.feature",
   "specs/sdd/SDD-FEATURE-SESSION-001.md",
-  "specs/test-plans/UNIT-FEATURE-SESSION-001.md"
+  "specs/test-plans/UNIT-FEATURE-SESSION-001.md",
+  "specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md"
 ];
 
 const requiredReadmeSections = [
@@ -49,7 +50,7 @@ if (existsSync("TRACEABILITY_MATRIX.md")) {
 
 const requirementChecks = [
   "## Status",
-  "APPROVED",
+  "CHANGES_REQUESTED",
   "## Owner",
   "## Reviewers",
   "## Acceptance Criteria",
@@ -109,9 +110,18 @@ if (existsSync("specs/sdd/SDD-FEATURE-SESSION-001.md")) {
 
 if (existsSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md")) {
   const plan = readFileSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md", "utf8");
-  for (const text of ["## Status", "VERIFIED", "## Test Cases", "## Execution", "## Evidence"]) {
+  for (const text of ["## Status", "CHANGES_REQUESTED", "## Test Cases", "## Execution", "## Evidence"]) {
     if (!plan.includes(text)) {
       fail(`UNIT-FEATURE-SESSION-001.md is missing "${text}"`);
+    }
+  }
+}
+
+if (existsSync("specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md")) {
+  const report = readFileSync("specs/review-reports/AGENT-REVIEW-FEATURE-SESSION-001.md", "utf8");
+  for (const text of ["## GamePM Review", "## Dev Review", "## Asset Review", "## QA Review", "## Required Corrections"]) {
+    if (!report.includes(text)) {
+      fail(`AGENT-REVIEW-FEATURE-SESSION-001.md is missing "${text}"`);
     }
   }
 }

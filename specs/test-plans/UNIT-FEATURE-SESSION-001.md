@@ -2,7 +2,7 @@
 
 ## Status
 
-VERIFIED
+CHANGES_REQUESTED
 
 ## Requirement
 
@@ -10,8 +10,9 @@ FEATURE-SESSION-001
 
 ## Scope
 
-These tests cover the domain rules for guest profiles and session token validation. They do
-not cover HTTP, cookies, SQLite, Redis, or browser behavior; those are reserved for later gates.
+These tests currently cover only the domain rules for guest profiles and session token
+validation. They do not yet cover `GuestSessionService.GetOrCreate`, HTTP, cookies, SQLite,
+Redis, or browser behavior; those gaps block QA approval.
 
 ## Test Cases
 
@@ -35,5 +36,6 @@ dotnet run --project tests/Game.Domain.Tests/Game.Domain.Tests.csproj
 
 ## Gate Result
 
-Implementation Ready for the minimal domain session model.
+CHANGES_REQUESTED. The smoke runner passed, but QA requires xUnit coverage and application
+service tests before this can be treated as a real unit-test gate.
 

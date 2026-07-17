@@ -2,7 +2,7 @@
 
 | Requirement ID | BDD Feature | SDD | Unit Tests | Integration Tests | Behavior Tests | Status |
 |---|---|---|---|---|---|---|
-| FEATURE-SESSION-001 | `specs/features/guest-session.feature` | `specs/sdd/SDD-FEATURE-SESSION-001.md` | `specs/test-plans/UNIT-FEATURE-SESSION-001.md` | Pending | Pending | IMPLEMENTED |
+| FEATURE-SESSION-001 | `specs/features/guest-session.feature` | `specs/sdd/SDD-FEATURE-SESSION-001.md` | `specs/test-plans/UNIT-FEATURE-SESSION-001.md` | Pending | Pending | CHANGES_REQUESTED |
 | FEATURE-FRIEND-001 | Pending | Pending | Pending | Pending | Pending | DRAFT |
 | FEATURE-BATTLE-001 | Pending | Pending | Pending | Pending | Pending | DRAFT |
 

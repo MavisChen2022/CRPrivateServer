@@ -2,7 +2,7 @@
 
 ## Status
 
-APPROVED
+CHANGES_REQUESTED
 
 ## Owner
 
@@ -10,10 +10,10 @@ GamePM
 
 ## Reviewers
 
-- Dev: APPROVED
-- QA: APPROVED
-- Asset: APPROVED
-- StudioLead Gate: BDD Ready
+- Dev: CHANGES_REQUESTED
+- QA: CHANGES_REQUESTED
+- Asset: CHANGES_REQUESTED
+- StudioLead Gate: CHANGES_REQUESTED
 
 ## Player Goal
 
@@ -60,3 +60,8 @@ account, while a returning guest keeps the same browser session after refresh.
 
 - Document gate: `npm.cmd run test:docs`
 
+## Review Result
+
+Four-agent review on 2026-07-17 returned `CHANGES_REQUESTED`. The BDD intent remains valid,
+but Start Battle, Friends, and Deck need defined placeholder behavior; error/retry, expired
+cookie, mobile, reduced motion, and multi-tab scenarios need explicit coverage.
