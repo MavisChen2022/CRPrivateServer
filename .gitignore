@@ -8,6 +8,8 @@ playwright-report/
 debug.log
 test-data/
 data/*.db
+data/*.db-*
+src/Game.Api/data/
 *.user
 *.suo
 *-dev.log

@@ -68,3 +68,20 @@ npm.cmd test
 ```
 
 Current MVP release gate: `specs/review-reports/RELEASE-GATE-MVP-001.md`.
+
+## Local Run
+
+The API server keeps the PowerShell window open while it is running. Seeing
+`Now listening on: http://localhost:5202` means the API started successfully.
+
+Start both API and Web in separate PowerShell windows with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
