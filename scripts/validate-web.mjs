@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 const requiredFiles = [
   "src/Game.Web/package.json",
+  "src/Game.Web/vite.config.ts",
   "src/Game.Web/index.html",
   "src/Game.Web/src/main.tsx",
   "src/Game.Web/src/game/battlePreview.ts",
@@ -43,4 +44,3 @@ if (process.exitCode) {
 }
 
 console.log("web validation passed");
-
