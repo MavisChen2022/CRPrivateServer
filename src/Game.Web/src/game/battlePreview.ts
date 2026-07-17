@@ -19,6 +19,8 @@ export function createBattlePreview(containerId: string, options: PreviewOptions
     this.load.image("arena", resolveImportedAsset("arena"));
     this.load.image("topTower", resolveImportedAsset("topTower"));
     this.load.image("bottomTower", resolveImportedAsset("bottomTower"));
+    this.load.image("trainingKnightUnit", resolveImportedAsset("trainingKnightUnit"));
+    this.load.image("trainingArcherUnit", resolveImportedAsset("trainingArcherUnit"));
     this.load.audio(deploySfxKey, resolveImportedAsset(deploySfxKey));
   };
 
@@ -53,6 +55,20 @@ export function createBattlePreview(containerId: string, options: PreviewOptions
         yoyo: true,
         repeat: -1
       });
+    }
+
+    if (hasImportedBattleSet && this.textures.exists("trainingKnightUnit") && this.textures.exists("trainingArcherUnit")) {
+      const knight = this.add.image(width / 2 - 42, height - 188, "trainingKnightUnit").setDisplaySize(68, 68);
+      const archer = this.add.image(width / 2 + 48, height - 238, "trainingArcherUnit").setDisplaySize(66, 66);
+      if (!options.reducedMotion) {
+        this.tweens.add({
+          targets: [knight, archer],
+          y: "-=16",
+          duration: 1100,
+          yoyo: true,
+          repeat: -1
+        });
+      }
     }
   };
 

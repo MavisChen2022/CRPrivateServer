@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import {
+  deploySfxForCard,
+  detectImportedBattleAssets,
+  resolveOptionalCardAsset,
+  resolveOptionalUnitAsset
+} from "./game/assetResolver";
 import "./styles/app.css";
 
 type SessionState =
@@ -21,15 +27,15 @@ type CommandKey = "battle" | "online" | "friends" | "deck";
 const commandCopy: Record<Exclude<CommandKey, "friends">, { title: string; body: string }> = {
   battle: {
     title: "Solo sandbox ready",
-    body: "Start Battle opens a server-run training fight with placeholder cards and no matchmaking promise."
+    body: "Start Battle opens a server-run training fight with local card art and sound when imported assets are available."
   },
   online: {
     title: "Online room ready",
-    body: "Online Battle pairs two guest players into a server-run placeholder battle room."
+    body: "Online Battle pairs two guest players into a server-run battle room with imported local arena assets when available."
   },
   deck: {
-    title: "Starter deck pending",
-    body: "Deck editing is reserved for the next gameplay slice after card data and asset loading are wired safely."
+    title: "Starter deck loaded",
+    body: "The starter deck uses imported local card art first and falls back safely when assets are missing."
   }
 };
 
@@ -278,10 +284,7 @@ function App() {
     let disposePreview: (() => void) | undefined;
     let disposed = false;
 
-    Promise.all([
-      import("./game/battlePreview"),
-      import("./game/assetResolver")
-    ]).then(async ([{ createBattlePreview }, { detectImportedBattleAssets }]) => {
+    import("./game/battlePreview").then(async ({ createBattlePreview }) => {
       const useImportedAssets = await detectImportedBattleAssets();
       if (!disposed) {
         disposePreview = createBattlePreview("battle-preview", {
@@ -1004,6 +1007,7 @@ function OnlineBattleScreen({
 
   const deploy = async (cardId: string) => {
     try {
+      playCardSfx(cardId);
       const next = await postOnlineDeploy(snapshot.roomId, {
         cardId,
         lane: "center",
@@ -1051,11 +1055,13 @@ function OnlineBattleScreen({
       <section className="online-layout">
         <div className="online-arena" data-testid="online-arena" role="img" aria-label="Server snapshot of the online arena">
           <div className={`tower online-tower online-tower-${opponent.side.toLowerCase()}`}>
-            {opponent.side} {opponent.towerHp}
+            <TowerArt assetKey="topTower" />
+            <span>{opponent.side} {opponent.towerHp}</span>
           </div>
           <div className="river" />
           <div className={`tower online-tower online-tower-${self.side.toLowerCase()}`}>
-            {self.side} {self.towerHp}
+            <TowerArt assetKey="bottomTower" />
+            <span>{self.side} {self.towerHp}</span>
           </div>
           {snapshot.units.map((unit) => (
             <div
@@ -1064,7 +1070,7 @@ function OnlineBattleScreen({
               style={{ top: `${Math.max(9, Math.min(88, unit.position / 10))}%` }}
               data-testid="online-unit"
             >
-              {unit.name.replace("Training ", "")}
+              <UnitArt cardId={unit.cardId} name={unit.name} />
             </div>
           ))}
         </div>
@@ -1099,7 +1105,7 @@ function OnlineBattleScreen({
                 disabled={snapshot.status === "Ended" || self.elixir < card.elixirCost}
                 onClick={() => deploy(card.cardId)}
               >
-                <span>{card.name}</span>
+                <CardArt card={card} />
                 <small>{card.elixirCost} elixir</small>
               </button>
             ))}
@@ -1171,6 +1177,7 @@ function BattleScreen({
   const snapshot = battle.snapshot;
   const deploy = async (cardId: string) => {
     try {
+      playCardSfx(cardId);
       const next = await postBattle(`/api/battles/${snapshot.battleId}/commands`, {
         cardId,
         lane: "center",
@@ -1221,9 +1228,15 @@ function BattleScreen({
           role="img"
           aria-label="Server snapshot of the solo sandbox arena"
         >
-          <div className="tower cpu-tower">CPU {snapshot.cpuTowerHp}</div>
+          <div className="tower cpu-tower">
+            <TowerArt assetKey="topTower" />
+            <span>CPU {snapshot.cpuTowerHp}</span>
+          </div>
           <div className="river" />
-          <div className="tower player-tower">You {snapshot.playerTowerHp}</div>
+          <div className="tower player-tower">
+            <TowerArt assetKey="bottomTower" />
+            <span>You {snapshot.playerTowerHp}</span>
+          </div>
           {snapshot.units.map((unit) => (
             <div
               key={unit.unitId}
@@ -1231,7 +1244,7 @@ function BattleScreen({
               style={{ top: `${Math.max(10, Math.min(86, unit.position / 10))}%` }}
               data-testid="battle-unit"
             >
-              {unit.name.replace("Training ", "")}
+              <UnitArt cardId={unit.cardId} name={unit.name} />
             </div>
           ))}
         </div>
@@ -1246,7 +1259,7 @@ function BattleScreen({
                 disabled={snapshot.status === "Ended" || snapshot.elixir < card.elixirCost}
                 onClick={() => deploy(card.cardId)}
               >
-                <span>{card.name}</span>
+                <CardArt card={card} />
                 <small>{card.elixirCost} elixir</small>
               </button>
             ))}
@@ -1273,6 +1286,68 @@ function BattleScreen({
       </section>
     </main>
   );
+}
+
+function CardArt({ card }: { card: BattleCard }) {
+  const asset = resolveOptionalCardAsset(card.cardId);
+  return (
+    <span className="card-art">
+      {asset ? (
+        <img
+          src={asset}
+          alt=""
+          aria-hidden="true"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
+      ) : null}
+      <span>{card.name.replace("Training ", "")}</span>
+    </span>
+  );
+}
+
+function TowerArt({ assetKey }: { assetKey: "topTower" | "bottomTower" }) {
+  const src = assetKey === "topTower"
+    ? "/assets/imported/ui/top-tower.png"
+    : "/assets/imported/ui/bottom-tower.png";
+  return (
+    <img
+      src={src}
+      alt=""
+      aria-hidden="true"
+      onError={(event) => {
+        event.currentTarget.style.display = "none";
+      }}
+    />
+  );
+}
+
+function UnitArt({ cardId, name }: { cardId: string; name: string }) {
+  const asset = resolveOptionalUnitAsset(cardId);
+  return (
+    <>
+      {asset ? (
+        <img
+          src={asset}
+          alt=""
+          aria-hidden="true"
+          onError={(event) => {
+            event.currentTarget.style.display = "none";
+          }}
+        />
+      ) : null}
+      <span>{name.replace("Training ", "")}</span>
+    </>
+  );
+}
+
+function playCardSfx(cardId: string) {
+  const audio = new Audio(deploySfxForCard(cardId));
+  audio.volume = 0.35;
+  void audio.play().catch(() => {
+    // Browsers can block autoplay or the optional local file can be missing.
+  });
 }
 
 async function fetchBattle(battleId: string) {

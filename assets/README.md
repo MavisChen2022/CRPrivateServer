@@ -6,10 +6,11 @@ permissions have both been reviewed.
 
 ## Local Imports
 
-- Put local reference assets under `assets/imported/`.
-- Keep `assets/imported/` ignored by Git.
+- Put local reference assets under `src/Game.Web/public/assets/imported/` by running
+  `scripts/import-local-assets.ps1`.
+- Keep `src/Game.Web/public/assets/imported/` and legacy `assets/imported/` ignored by Git.
 - Frontend code should resolve imported assets first and fall back to original placeholder
-  art when a local asset is missing.
+  art or silence when a local image or sound is missing.
 - Commit only pipeline notes, schemas, manifests for original placeholders, and generated
   assets that are safe to redistribute.
 

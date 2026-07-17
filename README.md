@@ -80,6 +80,17 @@ Start both API and Web in separate PowerShell windows with:
 powershell -ExecutionPolicy Bypass -File scripts/start-dev.ps1
 ```
 
+The script imports local art and sound from these folders before starting the game when they
+exist on this machine:
+
+```text
+C:\Users\User\Desktop\CR\Clash-Royale-assets
+C:\Users\User\Desktop\CR\Clash-Royale-SFX-master
+```
+
+Any missing local image or sound is skipped and the browser falls back to placeholder art or
+silence for that asset.
+
 Then open:
 
 ```text

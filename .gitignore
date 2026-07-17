@@ -17,3 +17,4 @@ src/Game.Api/data/
 .vs/
 .idea/
 assets/imported/
+src/Game.Web/public/assets/imported/

@@ -1,4 +1,5 @@
 import { expect, test, type Browser } from "@playwright/test";
+import { existsSync } from "node:fs";
 
 test.beforeEach(async ({ page }) => {
   page.on("console", (message) => {
@@ -59,11 +60,11 @@ test("invalid cookie recovers by issuing a replacement guest session", async ({ 
   expect(sessionCookie?.value).not.toBe("tampered-token");
 });
 
-test("deck placeholder stays honest", async ({ page }) => {
+test("starter deck command explains imported art fallback", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
 
   await page.getByTestId("deck-button").click();
-  await expect(page.getByTestId("command-placeholder")).toContainText("Starter deck pending");
+  await expect(page.getByTestId("command-placeholder")).toContainText("Starter deck loaded");
 });
 
 test("friends panel shows a stable friend code and empty list", async ({ page }) => {
@@ -219,7 +220,8 @@ test("two guest players can match, deploy, and restore an online room", async ({
 
     const spectatorPage = await spectator.newPage();
     await spectatorPage.goto("http://127.0.0.1:5173/", { waitUntil: "domcontentloaded" });
-    const forbidden = await spectator.request.get(`http://127.0.0.1:5173/api/online-battles/${fullRoomId}`);
+    await expect(spectatorPage.getByTestId("home-ready")).toBeVisible();
+    const forbidden = await spectatorPage.request.get(`http://127.0.0.1:5173/api/online-battles/${fullRoomId}`);
     expect(forbidden.status()).toBe(403);
 
     await playerA.page.getByTestId("online-deploy-card-training-knight").click();
@@ -266,6 +268,26 @@ test("start battle opens a playable solo sandbox", async ({ page }) => {
   await expect(page.getByTestId("battle-elixir")).toContainText("5/10");
   await expect(page.getByTestId("deploy-card-training-knight")).toBeVisible();
   await expect(page.getByTestId("battle-status")).toContainText("Battle active");
+});
+
+test("local imported card art appears when available", async ({ page }) => {
+  test.skip(
+    !existsSync("src/Game.Web/public/assets/imported/cards/training-knight.png"),
+    "Local imported Clash Royale assets are optional and ignored by Git."
+  );
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.getByTestId("start-battle-button").click();
+
+  await expect(page.getByTestId("battle-ready")).toBeVisible();
+  const cardImage = page.getByTestId("deploy-card-training-knight").locator("img");
+  await expect(cardImage).toBeVisible();
+  await expect.poll(() => cardImage.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+
+  await page.getByTestId("deploy-card-training-knight").click();
+  const unitImage = page.getByTestId("battle-unit").locator("img");
+  await expect(unitImage).toBeVisible();
+  await expect.poll(() => unitImage.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
 });
 
 test("deploying a unit consumes elixir and damages the enemy tower", async ({ page }) => {

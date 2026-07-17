@@ -6,6 +6,19 @@ param(
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $apiUrl = "http://localhost:$ApiPort"
+$assetRoot = "C:\Users\User\Desktop\CR\Clash-Royale-assets"
+$sfxRoot = "C:\Users\User\Desktop\CR\Clash-Royale-SFX-master"
+
+if ((Test-Path -LiteralPath $assetRoot) -and (Test-Path -LiteralPath $sfxRoot)) {
+    Write-Host "Importing local Clash Royale art and SFX"
+    try {
+        & (Join-Path $PSScriptRoot "import-local-assets.ps1") -AssetRoot $assetRoot -SfxRoot $sfxRoot
+    } catch {
+        Write-Warning "Local asset import failed. The game will continue with fallback art. $($_.Exception.Message)"
+    }
+} else {
+    Write-Host "Local Clash Royale asset folders were not found. The game will use fallback art."
+}
 
 Write-Host "Starting CRPrivateServer API at $apiUrl"
 Start-Process powershell -ArgumentList @(

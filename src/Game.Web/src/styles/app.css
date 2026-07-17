@@ -237,6 +237,8 @@ h1 {
 .solo-arena {
   aspect-ratio: 9 / 13;
   background:
+    linear-gradient(180deg, rgba(6, 15, 25, 0.18), rgba(6, 15, 25, 0.18)),
+    url("/assets/imported/scenes/arena.png") center / cover no-repeat,
     linear-gradient(90deg, transparent 32%, rgba(255, 255, 255, 0.12) 32%, rgba(255, 255, 255, 0.12) 34%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.12) 66%, rgba(255, 255, 255, 0.12) 68%, transparent 68%),
     linear-gradient(180deg, #215c4c 0 47%, #3d86a3 47% 53%, #265c43 53% 100%);
   border: 2px solid #6ab3ed;
@@ -257,7 +259,7 @@ h1 {
 
 .tower {
   align-items: center;
-  background: #f4c84d;
+  background: rgba(244, 200, 77, 0.92);
   border: 2px solid #241b00;
   border-radius: 8px;
   color: #241b00;
@@ -273,6 +275,22 @@ h1 {
   z-index: 2;
 }
 
+.tower img {
+  height: 68px;
+  left: 50%;
+  object-fit: contain;
+  pointer-events: none;
+  position: absolute;
+  top: -42px;
+  transform: translateX(-50%);
+  width: 82px;
+}
+
+.tower span {
+  position: relative;
+  z-index: 1;
+}
+
 .cpu-tower {
   top: 4%;
 }
@@ -283,7 +301,7 @@ h1 {
 
 .battle-unit {
   align-items: center;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.94);
   border: 2px solid #12304d;
   border-radius: 50%;
   color: #12304d;
@@ -296,6 +314,32 @@ h1 {
   transform: translate(-50%, -50%);
   width: 54px;
   z-index: 3;
+}
+
+.battle-unit img,
+.online-unit img {
+  height: 62px;
+  object-fit: contain;
+  pointer-events: none;
+  position: absolute;
+  width: 62px;
+}
+
+.battle-unit span,
+.online-unit span {
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  bottom: -16px;
+  color: #10243b;
+  font-size: 10px;
+  left: 50%;
+  max-width: 88px;
+  overflow: hidden;
+  padding: 2px 6px;
+  position: absolute;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+  white-space: nowrap;
 }
 
 .lane-left {
@@ -324,10 +368,33 @@ h1 {
 
 .starter-deck button {
   align-content: center;
+  background:
+    linear-gradient(180deg, rgba(44, 83, 126, 0.78), rgba(13, 36, 66, 0.94));
+  border-color: #d2a33c;
   display: grid;
-  gap: 3px;
-  min-height: 74px;
+  gap: 5px;
+  min-height: 118px;
   padding: 8px;
+}
+
+.card-art {
+  align-items: center;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-width: 0;
+}
+
+.card-art img {
+  aspect-ratio: 1;
+  filter: drop-shadow(0 8px 8px rgba(0, 0, 0, 0.32));
+  height: 72px;
+  object-fit: contain;
+  width: 72px;
+}
+
+.card-art span {
+  overflow-wrap: anywhere;
 }
 
 .starter-deck small {
@@ -356,6 +423,8 @@ h1 {
 .online-arena {
   aspect-ratio: 9 / 13;
   background:
+    linear-gradient(180deg, rgba(6, 15, 25, 0.2), rgba(6, 15, 25, 0.2)),
+    url("/assets/imported/scenes/arena.png") center / cover no-repeat,
     linear-gradient(90deg, transparent 32%, rgba(255, 255, 255, 0.14) 32%, rgba(255, 255, 255, 0.14) 34%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.14) 66%, rgba(255, 255, 255, 0.14) 68%, transparent 68%),
     linear-gradient(180deg, #7a3640 0 47%, #3d86a3 47% 53%, #245d47 53% 100%);
   border: 2px solid #6ab3ed;
@@ -456,6 +525,7 @@ h1 {
 
 .online-unit {
   align-items: center;
+  background: rgba(255, 255, 255, 0.92);
   border: 2px solid #12304d;
   border-radius: 50%;
   color: #12304d;

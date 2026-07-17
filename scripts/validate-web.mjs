@@ -7,7 +7,8 @@ const requiredFiles = [
   "src/Game.Web/src/main.tsx",
   "src/Game.Web/src/game/assetResolver.ts",
   "src/Game.Web/src/game/battlePreview.ts",
-  "src/Game.Web/src/styles/app.css"
+  "src/Game.Web/src/styles/app.css",
+  "scripts/import-local-assets.ps1"
 ];
 
 function fail(message) {
@@ -24,6 +25,9 @@ for (const file of requiredFiles) {
 const main = readFileSync("src/Game.Web/src/main.tsx", "utf8");
 for (const text of [
   "react",
+  "resolveOptionalCardAsset",
+  "resolveOptionalUnitAsset",
+  "deploySfxForCard",
   "createBattlePreview",
   "detectImportedBattleAssets",
   "data-testid=\"home-ready\"",
@@ -105,7 +109,10 @@ for (const text of [
   "detectImportedBattleAssets",
   "method: \"HEAD\"",
   "scenes/arena.png",
-  "sfx/deploy.mp3"
+  "cards/training-knight.png",
+  "units/training-knight.png",
+  "sfx/deploy.ogg",
+  "deploySfxForCard"
 ]) {
   if (!resolver.includes(text)) {
     fail(`assetResolver.ts is missing "${text}"`);
@@ -124,6 +131,8 @@ for (const text of [
   ".solo-arena",
   ".battle-hud",
   ".starter-deck",
+  ".card-art",
+  "url(\"/assets/imported/scenes/arena.png\")",
   ".online-layout",
   ".online-arena",
   ".online-status-panel",
