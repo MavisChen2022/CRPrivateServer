@@ -6,7 +6,8 @@ const requiredFiles = [
   "TRACEABILITY_MATRIX.md",
   "specs/requirements/FEATURE-SESSION-001.md",
   "specs/features/guest-session.feature",
-  "specs/sdd/SDD-FEATURE-SESSION-001.md"
+  "specs/sdd/SDD-FEATURE-SESSION-001.md",
+  "specs/test-plans/UNIT-FEATURE-SESSION-001.md"
 ];
 
 const requiredReadmeSections = [
@@ -102,6 +103,15 @@ if (existsSync("specs/sdd/SDD-FEATURE-SESSION-001.md")) {
   for (const section of sddSections) {
     if (!sdd.includes(section)) {
       fail(`SDD-FEATURE-SESSION-001.md is missing "${section}"`);
+    }
+  }
+}
+
+if (existsSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md")) {
+  const plan = readFileSync("specs/test-plans/UNIT-FEATURE-SESSION-001.md", "utf8");
+  for (const text of ["## Status", "VERIFIED", "## Test Cases", "## Execution", "## Evidence"]) {
+    if (!plan.includes(text)) {
+      fail(`UNIT-FEATURE-SESSION-001.md is missing "${text}"`);
     }
   }
 }

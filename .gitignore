@@ -1,0 +1,12 @@
+bin/
+obj/
+node_modules/
+TestResults/
+test-data/
+data/*.db
+*.user
+*.suo
+.vs/
+.idea/
+assets/imported/
+
